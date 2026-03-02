@@ -1,0 +1,31 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build & Install on Device",
+			"type": "shell",
+			"command": ".\\gradlew.bat installDebug",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Install Debug APK",
+			"type": "shell",
+			"command": ".\\gradlew.bat installDebug",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Gradle installDebug",
+			"type": "shell",
+			"command": "cd c:\\Users\\morgane\\Desktop\\the-verdict && .\\gradlew.bat installDebug",
+			"isBackground": false,
+			"problemMatcher": [
+				"$gradle"
+			],
+			"group": "build"
+		}
+	]
+}

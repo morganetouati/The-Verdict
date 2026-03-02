@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">The Verdict</string>
+    <string name="home_title">THE VERDICT</string>
+    <string name="home_subtitle">Lis dans les gens comme dans un livre ouvert</string>
+    <string name="new_case">NOUVELLE AFFAIRE</string>
+    <string name="analyses_remaining">%1$d/5 analyses restantes</string>
+    <string name="watch_ad_unlock">Regarder une pub → +5 analyses</string>
+    <string name="watch_ad_double_xp">Doubler les XP</string>
+    <string name="verdict_lie_detected">MENSONGE DÉTECTÉ</string>
+    <string name="verdict_truth_confirmed">VÉRITÉ CONFIRMÉE</string>
+    <string name="verdict_wrong">MAUVAIS VERDICT</string>
+    <string name="intuition_score">Score d\'Intuition</string>
+    <string name="see_lesson">Voir la Leçon</string>
+    <string name="next_case">Affaire Suivante</string>
+    <string name="profile">Profil</string>
+    <string name="level_novice">Novice</string>
+    <string name="level_detective">Détective</string>
+    <string name="level_mentalist">Mentaliste</string>
+    <string name="level_oracle">Oracle</string>
+
+    <!-- Detection buttons -->
+    <string name="detect_lips">Lèvres pincées</string>
+    <string name="detect_eyes">Blocage oculaire</string>
+    <string name="detect_touch">Auto-contact</string>
+
+    <!-- Lessons -->
+    <string name="lesson_micro_contempt_title">Micro-Mépris</string>
+    <string name="lesson_micro_contempt_desc">Un coin de la lèvre se relève d\'un seul côté. C\'est la seule expression faciale asymétrique, elle indique un sentiment de supériorité.</string>
+    <string name="lesson_eye_block_title">Blocage Oculaire</string>
+    <string name="lesson_eye_block_desc">Les yeux se ferment plus longtemps qu\'un simple clignement. C\'est un mécanisme de défense pour \"effacer\" une réalité dérangeante.</string>
+    <string name="lesson_lip_compress_title">Compression des Lèvres</string>
+    <string name="lesson_lip_compress_desc">Les lèvres forment une ligne droite. La personne retient quelque chose — une émotion ou une information.</string>
+    <string name="lesson_neck_scratch_title">Grattage du Cou</string>
+    <string name="lesson_neck_scratch_desc">La main gratte le côté du cou, sous l\'oreille. Un geste d\'auto-apaisement qui tente de ralentir le rythme cardiaque.</string>
+    <string name="lesson_head_incongruence_title">Incongruence Tête-Message</string>
+    <string name="lesson_head_incongruence_desc">La personne dit \"Oui\" mais sa tête fait un micro-mouvement de gauche à droite. Le corps dit la vérité avant le cerveau.</string>
+
+    <!-- Ads -->
+    <string name="ad_loading">Chargement…</string>
+    <string name="analyses_exhausted">Analyses épuisées</string>
+    <string name="analyses_exhausted_desc">Tu as utilisé tes 5 analyses gratuites aujourd\'hui.</string>
+</resources>

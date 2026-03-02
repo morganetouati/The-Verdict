@@ -1,0 +1,46 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration
+local.properties
+*.iml
+
+# Android Studio / IntelliJ
+.idea/
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore files (IMPORTANT: never commit your signing keys)
+*.jks
+*.keystore
+
+# Google Services (contains API keys — add manually or via CI secrets)
+google-services.json
+
+# Lint output
+lint/
+
+# Navigation cache
+.navigation/
