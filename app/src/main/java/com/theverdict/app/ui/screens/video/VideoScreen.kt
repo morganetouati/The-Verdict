@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -43,6 +44,18 @@ fun VideoScreen(
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
+    // ── Flash Néon Bleu : déclenché par chaque clic sur la DetectionBar ────────────
+    var flashTrigger by remember { mutableIntStateOf(0) }
+    var isFlashing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(flashTrigger) {
+        if (flashTrigger > 0) {
+            isFlashing = true
+            delay(500)
+            isFlashing = false
+        }
+    }
+
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
     }
@@ -53,7 +66,7 @@ fun VideoScreen(
             val mediaItem = MediaItem.fromUri(challenge.videoUrl)
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
-            exoPlayer.playWhenReady = true
+            exoPlayer.playWhenReady = false
         }
     }
 
@@ -103,6 +116,7 @@ fun VideoScreen(
     // Navigate when video ended
     LaunchedEffect(state.isVideoEnded) {
         if (state.isVideoEnded) {
+            exoPlayer.pause()
             delay(500) // Brief pause before transition
             state.challenge?.let { onVideoComplete(it.id) }
         }
@@ -114,65 +128,6 @@ fun VideoScreen(
             .background(NoirDeep)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // -- Story prompt + archive context --
-            state.challenge?.let { challenge ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Surface)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    Column {
-                        // Difficulty badge + title
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            // Difficulty indicator
-                            Text(
-                                text = challenge.difficulty.label.uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = when (challenge.difficulty) {
-                                    com.theverdict.app.domain.model.Difficulty.EASY -> com.theverdict.app.ui.theme.GreenTruth
-                                    com.theverdict.app.domain.model.Difficulty.MEDIUM -> Gold
-                                    com.theverdict.app.domain.model.Difficulty.HARD -> com.theverdict.app.ui.theme.RedLie
-                                },
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "•",
-                                color = TextSecondary,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                            Text(
-                                text = challenge.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Gold,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        // Story prompt (what the suspect says)
-                        Text(
-                            text = challenge.storyPrompt,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextPrimary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        // Archive context (Cold Case immersion)
-                        if (challenge.archiveContext.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = challenge.archiveContext,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Normal
-                            )
-                        }
-                    }
-                }
-            }
-
             // -- Video player + Detection bar overlay --
             Box(
                 modifier = Modifier
@@ -313,8 +268,18 @@ fun VideoScreen(
                 DetectionBar(
                     onDetection = { type -> viewModel.addDetectionTag(type) },
                     enabled = state.isPlaying && !state.isVideoEnded,
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onFlash = { flashTrigger++ }
                 )
+
+                // ── Flash Néon Bleu overlay ────────────────────────────────────
+                if (isFlashing) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(NeonBlue.copy(alpha = 0.18f))
+                    )
+                }
             }
 
             // -- Timeline --
@@ -326,6 +291,138 @@ fun VideoScreen(
                     onSeek = { /* Seeking disabled during play */ },
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
+            }
+
+            // -- Story prompt + archive context --
+            state.challenge?.let { challenge ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Surface)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Column {
+                        // Difficulty badge + title
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Difficulty indicator — show chosen DailyCaseMode if available, else video's own difficulty
+                            val modeLabel = state.dailyMode?.label ?: challenge.difficulty.label
+                            val modeColor = when (state.dailyMode) {
+                                com.theverdict.app.domain.model.DailyCaseMode.EASY -> com.theverdict.app.ui.theme.GreenTruth
+                                com.theverdict.app.domain.model.DailyCaseMode.MEDIUM -> Gold
+                                com.theverdict.app.domain.model.DailyCaseMode.HARD -> com.theverdict.app.ui.theme.RedLie
+                                null -> when (challenge.difficulty) {
+                                    com.theverdict.app.domain.model.Difficulty.EASY -> com.theverdict.app.ui.theme.GreenTruth
+                                    com.theverdict.app.domain.model.Difficulty.MEDIUM -> Gold
+                                    com.theverdict.app.domain.model.Difficulty.HARD -> com.theverdict.app.ui.theme.RedLie
+                                }
+                            }
+                            Text(
+                                text = modeLabel.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = modeColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                            // Hint count badge
+                            if (state.hintsAvailable.isNotEmpty()) {
+                                Icon(
+                                    imageVector = Icons.Default.Lightbulb,
+                                    contentDescription = null,
+                                    tint = Gold,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = "${state.hintsAvailable.size}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Gold,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Text(
+                                text = "•",
+                                color = TextSecondary,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = challenge.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Gold,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        // Story prompt (what the suspect says)
+                        Text(
+                            text = challenge.storyPrompt,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        // Archive context (Cold Case immersion)
+                        if (challenge.archiveContext.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = challenge.archiveContext,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            }
+
+            // -- Hints panel (daily case only) --
+            if (state.hintsAvailable.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    // Hint bulbs row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "INDICES",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextSecondary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        state.hintsAvailable.forEachIndexed { index, _ ->
+                            val isRevealed = index in state.hintsRevealed
+                            IconButton(
+                                onClick = { viewModel.revealHint(index) },
+                                enabled = !isRevealed,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Lightbulb,
+                                    contentDescription = "Indice ${index + 1}",
+                                    tint = if (isRevealed) Gold else TextSecondary.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                    // Show revealed hints
+                    state.hintsRevealed.sorted().forEach { index ->
+                        if (index in state.hintsAvailable.indices) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "💡 ${state.hintsAvailable[index]}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Gold
+                            )
+                        }
+                    }
+                }
             }
 
             // -- Credibility gauge --

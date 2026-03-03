@@ -20,3 +20,11 @@ val TextOnGold = Color(0xFF0A0A0F)
 // Overlays
 val OverlayDark = Color(0xCC0A0A0F) // 80% opacity
 val OverlayMedium = Color(0x800A0A0F) // 50% opacity
+
+// Lucidité / Feedback
+val NeonBlue = Color(0xFF00C8FF)
+val FlameOrange = Color(0xFFFF6B00)
+val FlameRed = Color(0xFFFF2D2D)
+val CrimeRed = Color(0xFF8B0000)
+val CredibilityGreen = Color(0xFF27AE60)
+val CredibilityAmber = Color(0xFFE67E22)

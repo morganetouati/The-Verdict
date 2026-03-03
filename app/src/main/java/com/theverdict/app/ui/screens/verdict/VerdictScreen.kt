@@ -234,6 +234,38 @@ fun VerdictScreen(
                     doubled = state.xpDoubled
                 )
 
+                // Daily case multiplier badge
+                if (state.dailyMultiplier > 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val mulColor = if (state.dailyMultiplier >= 3) FlameRed else FlameOrange
+                    Card(
+                        modifier = Modifier
+                            .border(1.dp, mulColor, RoundedCornerShape(8.dp)),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = mulColor.copy(alpha = 0.15f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lightbulb,
+                                contentDescription = null,
+                                tint = mulColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "×${state.dailyMultiplier} Cas du Jour",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = mulColor
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Credibility & stats

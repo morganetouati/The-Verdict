@@ -1,7 +1,7 @@
 package com.theverdict.app.data.repository
 
 import com.theverdict.app.data.local.PreferencesManager
-import com.theverdict.app.domain.model.PlayerLevel
+import com.theverdict.app.domain.model.MentalistRank
 import com.theverdict.app.domain.model.PlayerProfile
 import com.theverdict.app.domain.repository.PlayerRepository
 
@@ -21,7 +21,7 @@ class PlayerRepositoryImpl(
             displayName = displayName,
             avatarUrl = avatar,
             totalXp = xp,
-            level = PlayerLevel.fromXp(xp),
+            rank = MentalistRank.fromXp(xp),
             gamesPlayed = gamesPlayed,
             correctVerdicts = correctVerdicts,
             currentStreak = currentStreak,
@@ -37,4 +37,20 @@ class PlayerRepositoryImpl(
     override suspend fun addXp(amount: Int) {
         prefs.addXp(amount)
     }
+
+    override suspend fun applyCredibilityPenalty(uselessClicks: Int) {
+        prefs.applyCredibilityPenalty(uselessClicks)
+    }
+
+    override suspend fun isCredibilityLocked(): Boolean = prefs.isCredibilityLocked()
+
+    override suspend fun getCredibilityLockRemainingMs(): Long = prefs.getCredibilityLockRemainingMs()
+
+    override suspend fun getPersistentCredibility(): Int = prefs.getPersistentCredibility()
+
+    override suspend fun getCredibilityTickets(): Int = prefs.getCredibilityTickets()
+
+    override suspend fun useCredibilityTicket(): Boolean = prefs.useCredibilityTicket()
+
+    override suspend fun incrementCredibilityTickets() = prefs.incrementCredibilityTickets()
 }

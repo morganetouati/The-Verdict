@@ -7,6 +7,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.theverdict.app.domain.model.*
+import com.theverdict.app.domain.model.DailyCaseMode
 import com.theverdict.app.domain.repository.VideoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,12 +23,18 @@ data class VideoUiState(
     val isLoading: Boolean = true,
     val credibility: Int = 100,
     val errorMessage: String? = null,
-    val isBuffering: Boolean = false
+    val isBuffering: Boolean = false,
+    // ── Daily Case hints ─────────────────────
+    val dailyMode: DailyCaseMode? = null,
+    val hintsAvailable: List<String> = emptyList(),
+    val hintsRevealed: Set<Int> = emptySet()
 )
 
 class VideoViewModel(
     private val videoRepo: VideoRepository,
-    private val appContext: Context? = null
+    private val appContext: Context? = null,
+    private val loadDailyCase: Boolean = false,
+    private val dailyMode: DailyCaseMode? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VideoUiState())
@@ -51,11 +58,15 @@ class VideoViewModel(
                     )
                     return@launch
                 }
-                val challenge = videoRepo.getRandomChallenge()
+                val challenge = if (loadDailyCase) videoRepo.getDailyCaseChallenge()
+                                else videoRepo.getRandomChallenge()
+                val hints = if (dailyMode != null) challenge.hints.take(dailyMode.hintCount) else emptyList()
                 _uiState.value = VideoUiState(
                     challenge = challenge,
                     isLoading = false,
-                    isPlaying = true
+                    isPlaying = false,
+                    dailyMode = dailyMode,
+                    hintsAvailable = hints
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -92,7 +103,21 @@ class VideoViewModel(
 
     fun updatePosition(positionMs: Long) {
         _uiState.value = _uiState.value.copy(currentPositionMs = positionMs)
+        // Duration cap for daily case modes
+        val mode = _uiState.value.dailyMode
+        if (mode != null && positionMs >= mode.maxDurationMs && !_uiState.value.isVideoEnded) {
+            onVideoEnded()
+        }
     }
+
+    fun revealHint(index: Int) {
+        val current = _uiState.value
+        if (index in current.hintsAvailable.indices && index !in current.hintsRevealed) {
+            _uiState.value = current.copy(hintsRevealed = current.hintsRevealed + index)
+        }
+    }
+
+    fun getDailyMultiplier(): Int = dailyMode?.scoreMultiplier ?: 1
 
     fun onVideoEnded() {
         _uiState.value = _uiState.value.copy(
@@ -264,11 +289,23 @@ class VideoViewModel(
 
     class Factory(
         private val videoRepo: VideoRepository,
-        private val appContext: Context? = null
+        private val appContext: Context? = null,
+        private val mode: DailyCaseMode? = null
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return VideoViewModel(videoRepo, appContext) as T
+            return VideoViewModel(videoRepo, appContext, loadDailyCase = false, dailyMode = mode) as T
+        }
+    }
+
+    class DailyFactory(
+        private val videoRepo: VideoRepository,
+        private val appContext: Context? = null,
+        private val dailyMode: DailyCaseMode = DailyCaseMode.EASY
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return VideoViewModel(videoRepo, appContext, loadDailyCase = true, dailyMode = dailyMode) as T
         }
     }
 }

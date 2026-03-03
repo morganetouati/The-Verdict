@@ -6,4 +6,5 @@ interface VideoRepository {
     suspend fun getRandomChallenge(): VideoChallenge
     suspend fun getChallengeById(id: String): VideoChallenge?
     fun getAllChallenges(): List<VideoChallenge>
+    suspend fun getDailyCaseChallenge(): VideoChallenge
 }

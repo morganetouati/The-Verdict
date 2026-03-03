@@ -5,8 +5,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,25 +27,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import com.theverdict.app.data.audio.DetectionSoundManager
 import com.theverdict.app.domain.model.MicroExpressionType
 import com.theverdict.app.ui.theme.*
 import kotlinx.coroutines.delay
 
 /**
- * Barre de détection — 5 boutons pour tagger des micro-expressions
- * pendant la lecture vidéo. Feedback haptique + cooldown 500ms par bouton
- * + cooldown global 300ms entre tout clic.
- * Tous les types : Lèvres pincées, Blocage oculaire, Auto-contact,
- * Micro-mépris, Incongruence tête-message.
+ * Barre de détection — 5 boutons pour tagger des micro-expressions.
+ * Feedback enrichi :
+ *   - Haptique : vibration courte et sèche (EFFECT_CLICK sur API 29+)
+ *   - Sonore   : ping cristallin 880 Hz via AudioTrack (DetectionSoundManager)
+ *   - Visuel   : flash néon bleu via callback [onFlash] → overlay géré par VideoScreen
+ * Cooldown 500ms/bouton + 300ms global anti-spam.
  */
 @Composable
 fun DetectionBar(
     onDetection: (MicroExpressionType) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    onFlash: () -> Unit = {}
 ) {
     val detectionButtons = MicroExpressionType.entries
-    // R5 — Global cooldown across all 5 buttons (300ms)
     var globalCooldown by remember { mutableStateOf(false) }
 
     LaunchedEffect(globalCooldown) {
@@ -70,6 +71,7 @@ fun DetectionBar(
                 enabled = enabled && !globalCooldown,
                 onClick = {
                     globalCooldown = true
+                    onFlash()
                     onDetection(type)
                 }
             )
@@ -123,21 +125,27 @@ private fun DetectionButton(
                 isPressed = true
                 isOnCooldown = true
 
-                // Haptic feedback
+                // ── Haptique : sec et précis ─────────────────────────────────
                 try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         val vm = context.getSystemService(VibratorManager::class.java)
                         vm?.defaultVibrator?.vibrate(
-                            VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            else
+                                VibrationEffect.createOneShot(40, 255)
                         )
                     } else {
                         @Suppress("DEPRECATION")
                         val vibrator = context.getSystemService(Vibrator::class.java)
                         vibrator?.vibrate(
-                            VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE)
+                            VibrationEffect.createOneShot(40, 255)
                         )
                     }
                 } catch (_: Exception) { }
+
+                // ── Sonore : ping cristallin 880 Hz ─────────────────────────
+                DetectionSoundManager.playPing()
 
                 onClick()
             }

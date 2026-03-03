@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.theverdict.app.data.ads.AdManager
+import com.theverdict.app.data.local.PreferencesManager
 import com.theverdict.app.domain.model.*
 import com.theverdict.app.domain.repository.GameRepository
 import com.theverdict.app.domain.repository.PlayerRepository
@@ -37,7 +38,8 @@ data class VerdictUiState(
     val credibility: Int = 100,
     val totalPoints: Int = 0,
     val uselessClicks: Int = 0,
-    val replaySegments: List<ReplaySegment> = emptyList()
+    val replaySegments: List<ReplaySegment> = emptyList(),
+    val dailyMultiplier: Int = 1
 )
 
 enum class VerdictPhase {
@@ -53,10 +55,13 @@ class VerdictViewModel(
     private val intuitionScore: Int,
     private val credibility: Int,
     private val uselessClicks: Int,
+    private val isDailyCase: Boolean = false,
+    private val dailyMultiplier: Int = 1,
     private val videoRepo: VideoRepository,
     private val playerRepo: PlayerRepository,
     private val gameRepo: GameRepository,
-    private val adManager: AdManager
+    private val adManager: AdManager,
+    private val prefs: PreferencesManager? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VerdictUiState())
@@ -77,7 +82,8 @@ class VerdictViewModel(
                 credibility = credibility,
                 uselessClicks = uselessClicks,
                 totalPoints = totalPoints,
-                replaySegments = segments
+                replaySegments = segments,
+                dailyMultiplier = dailyMultiplier
             )
         }
 
@@ -137,7 +143,7 @@ class VerdictViewModel(
         val useless = _uiState.value.uselessClicks
 
         val xpEarned = (
-                (totalPoints * difficultyMultiplier).toInt() - (useless * 10) + verdictBonus
+                (totalPoints * difficultyMultiplier * dailyMultiplier).toInt() - (useless * 10) + verdictBonus
                 ).coerceAtLeast(0)
 
         _uiState.value = _uiState.value.copy(
@@ -163,6 +169,12 @@ class VerdictViewModel(
                 uselessClicks = useless
             )
             gameRepo.saveResult(result)
+
+            // Mark daily case as played
+            if (isDailyCase) prefs?.setDailyCasePlayed()
+
+            // Apply persistent credibility penalty (>= 3 useless clicks)
+            if (useless >= 3) playerRepo.applyCredibilityPenalty(useless)
         }
     }
 
@@ -192,16 +204,19 @@ class VerdictViewModel(
         private val intuitionScore: Int,
         private val credibility: Int,
         private val uselessClicks: Int,
+        private val isDailyCase: Boolean = false,
+        private val dailyMultiplier: Int = 1,
         private val videoRepo: VideoRepository,
         private val playerRepo: PlayerRepository,
         private val gameRepo: GameRepository,
-        private val adManager: AdManager
+        private val adManager: AdManager,
+        private val prefs: PreferencesManager? = null
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return VerdictViewModel(
                 videoId, playerTags, intuitionScore, credibility, uselessClicks,
-                videoRepo, playerRepo, gameRepo, adManager
+                isDailyCase, dailyMultiplier, videoRepo, playerRepo, gameRepo, adManager, prefs
             ) as T
         }
     }

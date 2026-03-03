@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.Instant
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "verdict_prefs")
 
@@ -25,6 +26,15 @@ class PreferencesManager(private val context: Context) {
         private val KEY_AVATAR = stringPreferencesKey("avatar_emoji")
         private val KEY_PLAYED_IDS = stringPreferencesKey("played_video_ids")
         private val KEY_MUSIC_ENABLED = booleanPreferencesKey("music_enabled")
+
+        // ── Daily Case ───────────────────────────────────────────────
+        private val KEY_DAILY_CASE_PLAYED_DATE = stringPreferencesKey("daily_case_played_date")
+
+        // ── Persistent Credibility ───────────────────────────────────
+        private val KEY_PERSISTENT_CREDIBILITY = intPreferencesKey("persistent_credibility")
+        private val KEY_CREDIBILITY_LOCKED_UNTIL = longPreferencesKey("credibility_locked_until")
+        private val KEY_CREDIBILITY_LAST_REGEN = longPreferencesKey("credibility_last_regen")
+        private val KEY_CREDIBILITY_TICKETS = intPreferencesKey("credibility_tickets")
     }
 
     private val dateFormat = DateTimeFormatter.ISO_LOCAL_DATE
@@ -153,5 +163,99 @@ class PreferencesManager(private val context: Context) {
         // Also persist to SharedPreferences for sync access
         val sharedPrefs = context.getSharedPreferences("verdict_onboarding", Context.MODE_PRIVATE)
         sharedPrefs.edit().putBoolean("music_enabled", enabled).apply()
+    }
+
+    // ── Daily Case ────────────────────────────────────────────────────
+
+    suspend fun getDailyCasePlayedDate(): String {
+        return context.dataStore.data.map { it[KEY_DAILY_CASE_PLAYED_DATE] ?: "" }.first()
+    }
+
+    suspend fun setDailyCasePlayed() {
+        val today = LocalDate.now().format(dateFormat)
+        context.dataStore.edit { it[KEY_DAILY_CASE_PLAYED_DATE] = today }
+    }
+
+    suspend fun isDailyCaseDoneToday(): Boolean {
+        val today = LocalDate.now().format(dateFormat)
+        return getDailyCasePlayedDate() == today
+    }
+
+    suspend fun getLastPlayDate(): String {
+        return context.dataStore.data.map { it[KEY_LAST_PLAY_DATE] ?: "" }.first()
+    }
+
+    // ── Persistent Credibility ────────────────────────────────────────
+
+    /** Returns current credibility (0-100), applying passive regen first. */
+    suspend fun getPersistentCredibility(): Int {
+        regenerateCredibility()
+        return context.dataStore.data.map { it[KEY_PERSISTENT_CREDIBILITY] ?: 100 }.first()
+    }
+
+    /** Passive regen: +1 pt per minute since last regen, capped at 100. */
+    suspend fun regenerateCredibility() {
+        context.dataStore.edit { prefs ->
+            val now = Instant.now().toEpochMilli()
+            val lastRegen = prefs[KEY_CREDIBILITY_LAST_REGEN] ?: now
+            val current = prefs[KEY_PERSISTENT_CREDIBILITY] ?: 100
+            val minutesElapsed = ((now - lastRegen) / 60_000L).toInt().coerceAtLeast(0)
+            val newCredibility = (current + minutesElapsed).coerceAtMost(100)
+            prefs[KEY_PERSISTENT_CREDIBILITY] = newCredibility
+            prefs[KEY_CREDIBILITY_LAST_REGEN] = now
+        }
+    }
+
+    /**
+     * Applies penalty from useless clicks.
+     * Penalty = uselessClicks * 8 pts.
+     * If credibility reaches 0 → lock for 30 minutes.
+     */
+    suspend fun applyCredibilityPenalty(uselessClicks: Int) {
+        if (uselessClicks < 3) return // Give beginners a break
+        regenerateCredibility()
+        context.dataStore.edit { prefs ->
+            val current = prefs[KEY_PERSISTENT_CREDIBILITY] ?: 100
+            val penalty = uselessClicks * 8
+            val newVal = (current - penalty).coerceAtLeast(0)
+            prefs[KEY_PERSISTENT_CREDIBILITY] = newVal
+            if (newVal == 0) {
+                val lockUntil = Instant.now().toEpochMilli() + 30 * 60 * 1000L
+                prefs[KEY_CREDIBILITY_LOCKED_UNTIL] = lockUntil
+            }
+        }
+    }
+
+    suspend fun isCredibilityLocked(): Boolean {
+        val lockedUntil = context.dataStore.data.map { it[KEY_CREDIBILITY_LOCKED_UNTIL] ?: 0L }.first()
+        return Instant.now().toEpochMilli() < lockedUntil
+    }
+
+    suspend fun getCredibilityLockRemainingMs(): Long {
+        val lockedUntil = context.dataStore.data.map { it[KEY_CREDIBILITY_LOCKED_UNTIL] ?: 0L }.first()
+        return (lockedUntil - Instant.now().toEpochMilli()).coerceAtLeast(0L)
+    }
+
+    suspend fun getCredibilityTickets(): Int {
+        return context.dataStore.data.map { it[KEY_CREDIBILITY_TICKETS] ?: 0 }.first()
+    }
+
+    suspend fun incrementCredibilityTickets() {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_CREDIBILITY_TICKETS] = (prefs[KEY_CREDIBILITY_TICKETS] ?: 0) + 1
+        }
+    }
+
+    /** Consumes 1 ticket: unlocks immediately, restores credibility to 50. */
+    suspend fun useCredibilityTicket(): Boolean {
+        val tickets = getCredibilityTickets()
+        if (tickets <= 0) return false
+        context.dataStore.edit { prefs ->
+            prefs[KEY_CREDIBILITY_TICKETS] = tickets - 1
+            prefs[KEY_CREDIBILITY_LOCKED_UNTIL] = 0L
+            prefs[KEY_PERSISTENT_CREDIBILITY] = 50
+            prefs[KEY_CREDIBILITY_LAST_REGEN] = Instant.now().toEpochMilli()
+        }
+        return true
     }
 }

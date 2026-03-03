@@ -18,6 +18,8 @@ import com.theverdict.app.data.repository.GameRepositoryImpl
 import com.theverdict.app.data.repository.PlayerRepositoryImpl
 import com.theverdict.app.data.repository.VideoRepositoryImpl
 import com.theverdict.app.domain.model.DetectionTag
+import com.theverdict.app.domain.model.DailyCaseMode
+import com.theverdict.app.ui.screens.daily.DailyCaseDifficultyScreen
 import com.theverdict.app.ui.screens.home.HomeScreen
 import com.theverdict.app.ui.screens.home.HomeViewModel
 import com.theverdict.app.ui.screens.lesson.LessonScreen
@@ -31,12 +33,17 @@ import com.theverdict.app.ui.screens.video.VideoViewModel
 object Routes {
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
-    const val VIDEO = "video"
+    const val VIDEO = "video/{mode}"
+    const val DAILY_VIDEO = "daily_video/{mode}"
+    const val DAILY_DIFFICULTY = "daily_difficulty"
+    const val DIFFICULTY = "difficulty"
     const val VERDICT = "verdict/{videoId}"
     const val LESSON = "lesson"
     const val PROFILE = "profile"
 
     fun verdict(videoId: String) = "verdict/$videoId"
+    fun dailyVideo(mode: String) = "daily_video/$mode"
+    fun video(mode: String) = "video/$mode"
 }
 
 @Composable
@@ -54,7 +61,7 @@ fun VerdictNavGraph(
 
     // Shared HomeViewModel
     val homeViewModel: HomeViewModel = viewModel(
-        factory = HomeViewModel.Factory(playerRepo, gameRepo)
+        factory = HomeViewModel.Factory(playerRepo, gameRepo, videoRepo, preferencesManager)
     )
 
     // State to pass between video and verdict screens
@@ -63,6 +70,8 @@ fun VerdictNavGraph(
     var lastCredibility by remember { mutableStateOf(100) }
     var lastUselessClicks by remember { mutableStateOf(0) }
     var lastVideoViewModel by remember { mutableStateOf<VideoViewModel?>(null) }
+    var lastIsDailyCase by remember { mutableStateOf(false) }
+    var lastDailyMultiplier by remember { mutableIntStateOf(1) }
 
     // Check if onboarding was completed
     val hasSeenOnboarding by remember {
@@ -76,7 +85,7 @@ fun VerdictNavGraph(
     val currentEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(currentEntry?.destination?.route) {
         val route = currentEntry?.destination?.route
-        ambientMusic.setVideoPlaying(route == Routes.VIDEO)
+        ambientMusic.setVideoPlaying(route == Routes.VIDEO || route == Routes.DAILY_VIDEO)
     }
 
     // Transition animations
@@ -115,20 +124,38 @@ fun VerdictNavGraph(
             HomeScreen(
                 viewModel = homeViewModel,
                 onStartGame = {
-                    navController.navigate(Routes.VIDEO) {
-                        launchSingleTop = true
-                    }
+                    lastIsDailyCase = false
+                    navController.navigate(Routes.DIFFICULTY) { launchSingleTop = true }
+                },
+                onStartDailyCase = {
+                    lastIsDailyCase = true
+                    navController.navigate(Routes.DAILY_DIFFICULTY) { launchSingleTop = true }
                 },
                 onOpenProfile = {
-                    navController.navigate(Routes.PROFILE) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(Routes.PROFILE) { launchSingleTop = true }
                 },
                 onOpenLessons = {
-                    navController.navigate(Routes.LESSON) {
-                        launchSingleTop = true
+                    navController.navigate(Routes.LESSON) { launchSingleTop = true }
+                },
+                adManager = adManager
+            )
+        }
+
+        composable(
+            Routes.DIFFICULTY,
+            enterTransition = enterAnim,
+            exitTransition = exitAnim
+        ) {
+            DailyCaseDifficultyScreen(
+                screenTitle = "NOUVELLE ANALYSE",
+                challengeTitle = "",
+                onModeSelected = { mode ->
+                    lastDailyMultiplier = mode.scoreMultiplier
+                    navController.navigate(Routes.video(mode.name)) {
+                        popUpTo(Routes.DIFFICULTY) { inclusive = true }
                     }
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -136,23 +163,74 @@ fun VerdictNavGraph(
             Routes.VIDEO,
             enterTransition = enterAnim,
             exitTransition = exitAnim
-        ) {
+        ) { backStackEntry ->
+            val modeName = backStackEntry.arguments?.getString("mode") ?: DailyCaseMode.EASY.name
+            val selectedMode = try { DailyCaseMode.valueOf(modeName) } catch (_: Exception) { DailyCaseMode.EASY }
             val appContext = LocalContext.current.applicationContext
             val videoViewModel: VideoViewModel = viewModel(
-                factory = VideoViewModel.Factory(videoRepo, appContext)
+                key = "video_vm_$modeName",
+                factory = VideoViewModel.Factory(videoRepo, appContext, mode = selectedMode)
             )
             lastVideoViewModel = videoViewModel
 
             VideoScreen(
                 viewModel = videoViewModel,
                 onVideoComplete = { videoId ->
-                    // Save tags, score, credibility, and useless clicks before navigating
                     lastPlayerTags = videoViewModel.evaluateTags()
                     lastIntuitionScore = videoViewModel.calculateScore()
                     lastCredibility = videoViewModel.getCredibility()
                     lastUselessClicks = videoViewModel.getUselessClicks()
+                    lastDailyMultiplier = videoViewModel.getDailyMultiplier()
                     navController.navigate(Routes.verdict(videoId)) {
                         popUpTo(Routes.VIDEO) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            Routes.DAILY_DIFFICULTY,
+            enterTransition = enterAnim,
+            exitTransition = exitAnim
+        ) {
+            val dailyTitle = homeViewModel.uiState.collectAsState().value.dailyChallenge?.title ?: "Cas du Jour"
+            DailyCaseDifficultyScreen(
+                screenTitle = "CAS DU JOUR",
+                challengeTitle = dailyTitle,
+                onModeSelected = { mode ->
+                    lastDailyMultiplier = mode.scoreMultiplier
+                    navController.navigate(Routes.dailyVideo(mode.name)) {
+                        popUpTo(Routes.DAILY_DIFFICULTY) { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            Routes.DAILY_VIDEO,
+            enterTransition = enterAnim,
+            exitTransition = exitAnim
+        ) { backStackEntry ->
+            val modeName = backStackEntry.arguments?.getString("mode") ?: DailyCaseMode.EASY.name
+            val dailyMode = try { DailyCaseMode.valueOf(modeName) } catch (_: Exception) { DailyCaseMode.EASY }
+            val appContext = LocalContext.current.applicationContext
+            val videoViewModel: VideoViewModel = viewModel(
+                key = "daily_video_vm_$modeName",
+                factory = VideoViewModel.DailyFactory(videoRepo, appContext, dailyMode)
+            )
+            lastVideoViewModel = videoViewModel
+
+            VideoScreen(
+                viewModel = videoViewModel,
+                onVideoComplete = { videoId ->
+                    lastPlayerTags = videoViewModel.evaluateTags()
+                    lastIntuitionScore = videoViewModel.calculateScore()
+                    lastCredibility = videoViewModel.getCredibility()
+                    lastUselessClicks = videoViewModel.getUselessClicks()
+                    lastDailyMultiplier = videoViewModel.getDailyMultiplier()
+                    navController.navigate(Routes.verdict(videoId)) {
+                        popUpTo(Routes.DAILY_VIDEO) { inclusive = true }
                     }
                 }
             )
@@ -172,10 +250,13 @@ fun VerdictNavGraph(
                     intuitionScore = lastIntuitionScore,
                     credibility = lastCredibility,
                     uselessClicks = lastUselessClicks,
+                    isDailyCase = lastIsDailyCase,
+                    dailyMultiplier = lastDailyMultiplier,
                     videoRepo = videoRepo,
                     playerRepo = playerRepo,
                     gameRepo = gameRepo,
-                    adManager = adManager
+                    adManager = adManager,
+                    prefs = preferencesManager
                 )
             )
 

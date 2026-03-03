@@ -24,10 +24,12 @@ class AdManager(private val context: Context) {
         // Test ad unit IDs (replace with real ones for production)
         private const val AD_UNIT_UNLOCK = "ca-app-pub-3940256099942544/5224354917"
         private const val AD_UNIT_DOUBLE_XP = "ca-app-pub-3940256099942544/5224354917"
+        private const val AD_UNIT_CREDIBILITY = "ca-app-pub-3940256099942544/5224354917"
     }
 
     private var unlockAd: RewardedAd? = null
     private var doubleXpAd: RewardedAd? = null
+    private var credibilityAd: RewardedAd? = null
 
     private val _isUnlockAdReady = MutableStateFlow(false)
     val isUnlockAdReady: StateFlow<Boolean> = _isUnlockAdReady
@@ -35,10 +37,14 @@ class AdManager(private val context: Context) {
     private val _isDoubleXpAdReady = MutableStateFlow(false)
     val isDoubleXpAdReady: StateFlow<Boolean> = _isDoubleXpAdReady
 
+    private val _isCredibilityAdReady = MutableStateFlow(false)
+    val isCredibilityAdReady: StateFlow<Boolean> = _isCredibilityAdReady
+
     fun initialize() {
         MobileAds.initialize(context) {
             preloadUnlockAd()
             preloadDoubleXpAd()
+            preloadCredibilityAd()
         }
     }
 
@@ -105,6 +111,40 @@ class AdManager(private val context: Context) {
                 doubleXpAd = null
                 _isDoubleXpAdReady.value = false
                 preloadDoubleXpAd()
+            }
+        }
+        ad.show(activity) { onRewarded() }
+    }
+
+    fun preloadCredibilityAd() {
+        val adRequest = AdRequest.Builder().build()
+        RewardedAd.load(context, AD_UNIT_CREDIBILITY, adRequest, object : RewardedAdLoadCallback() {
+            override fun onAdLoaded(ad: RewardedAd) {
+                credibilityAd = ad
+                _isCredibilityAdReady.value = true
+            }
+
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                credibilityAd = null
+                _isCredibilityAdReady.value = false
+            }
+        })
+    }
+
+    fun showCredibilityAd(activity: Activity, onRewarded: () -> Unit, onDismissed: () -> Unit = {}) {
+        val ad = credibilityAd ?: return
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                credibilityAd = null
+                _isCredibilityAdReady.value = false
+                preloadCredibilityAd()
+                onDismissed()
+            }
+
+            override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                credibilityAd = null
+                _isCredibilityAdReady.value = false
+                preloadCredibilityAd()
             }
         }
         ad.show(activity) { onRewarded() }
