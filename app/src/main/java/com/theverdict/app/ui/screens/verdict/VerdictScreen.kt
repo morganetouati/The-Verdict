@@ -1,735 +1,276 @@
 package com.theverdict.app.ui.screens.verdict
 
-import android.app.Activity
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.VideoLibrary
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.theverdict.app.data.ads.AdManager
-import com.theverdict.app.domain.model.TagAccuracy
-import com.theverdict.app.ui.components.ScoreCounter
-import com.theverdict.app.ui.components.VerdictStamp
-import com.theverdict.app.ui.components.XpCounter
+import com.theverdict.app.data.repository.CaseRepository
+import com.theverdict.app.data.repository.PlayerRepository
+import com.theverdict.app.domain.model.CaseTheme
+import com.theverdict.app.domain.model.PlayerProfile
+import com.theverdict.app.domain.model.Suspect
+import com.theverdict.app.ui.components.SuspectAvatar
+import com.theverdict.app.ui.components.TimerBar
 import com.theverdict.app.ui.theme.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerdictScreen(
-    viewModel: VerdictViewModel,
-    adManager: AdManager,
-    onGoHome: () -> Unit,
-    onGoToLesson: () -> Unit
+    caseRepository: CaseRepository,
+    playerRepository: PlayerRepository,
+    themeIndex: Int,
+    caseIndex: Int,
+    onResult: (isCorrect: Boolean, pointsChange: Int) -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
+    val theme = CaseTheme.entries[themeIndex]
+    val case = caseRepository.getCase(theme, caseIndex)
+    val profile by playerRepository.profile.collectAsState(initial = PlayerProfile())
+    val scope = rememberCoroutineScope()
+    val selectedIds = remember { mutableStateListOf<Int>() }
+    var nobodySelected by remember { mutableIntStateOf(0) } // 0=not selected, 1=nobody, 2=everyone
+
+    // Timer
+    var remainingSeconds by remember { mutableIntStateOf(90) }
+    val hasTimer = theme.hasTimer
+
+    LaunchedEffect(hasTimer) {
+        if (hasTimer) {
+            while (remainingSeconds > 0) {
+                delay(1000)
+                remainingSeconds--
+            }
+            // Auto-submit empty verdict when time expires
+            if (case != null) {
+                scope.launch {
+                    val result = playerRepository.applyVerdict(profile, case, emptyList())
+                    onResult(result.isCorrect, result.pointsChange)
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(NoirDeep)
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(DarkBackground)
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        TopAppBar(
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Gavel, contentDescription = null, tint = GoldPrimary)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Votre Verdict")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = DarkBackground,
+                titleContentColor = TextWhite
+            )
+        )
 
-        when (state.phase) {
-            VerdictPhase.CHOOSE_VERDICT -> {
-                // -- Choose: Mensonge or Vérité --
-                Text(
-                    text = "VOTRE VERDICT",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = Gold,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                state.challenge?.let {
-                    Text(
-                        text = it.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = TextSecondary,
-                        textAlign = TextAlign.Center
-                    )
+        if (case != null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+            ) {
+                // Timer bar
+                if (hasTimer) {
+                    TimerBar(remainingSeconds = remainingSeconds)
+                    Spacer(Modifier.height(16.dp))
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Qui ment ?",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextWhite
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = if (theme.hasSpecialVerdicts) "Sélectionnez un ou plusieurs suspects, ou un choix spécial" else "Sélectionnez le suspect qui ment",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextGray
+                )
+                Spacer(Modifier.height(16.dp))
 
-                // Stats summary before verdict
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                // Suspect choices
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "${state.evaluatedTags.size}",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = Gold,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "marqueurs",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary
+                    items(case.suspects) { suspect ->
+                        val isSelected = suspect.id in selectedIds
+                        SuspectVerdictCard(
+                            suspect = suspect,
+                            isSelected = isSelected,
+                            onClick = {
+                                nobodySelected = 0
+                                if (theme.hasSpecialVerdicts) {
+                                    if (isSelected) selectedIds.remove(suspect.id)
+                                    else selectedIds.add(suspect.id)
+                                } else {
+                                    selectedIds.clear()
+                                    selectedIds.add(suspect.id)
+                                }
+                            }
                         )
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "${state.credibility}%",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = when {
-                                state.credibility > 60 -> Gold
-                                state.credibility > 30 -> Color(0xFFE67E22)
-                                else -> RedLie
-                            },
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "crédibilité",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary
-                        )
+
+                    // Special options for advanced themes
+                    if (theme.hasSpecialVerdicts) {
+                        item {
+                            Spacer(Modifier.height(8.dp))
+                            SpecialOption(
+                                text = "👤 Personne ne ment",
+                                isSelected = nobodySelected == 1,
+                                onClick = {
+                                    selectedIds.clear()
+                                    nobodySelected = if (nobodySelected == 1) 0 else 1
+                                }
+                            )
+                        }
+                        item {
+                            SpecialOption(
+                                text = "👥 Tous mentent",
+                                isSelected = nobodySelected == 2,
+                                onClick = {
+                                    selectedIds.clear()
+                                    selectedIds.addAll(case.suspects.map { it.id })
+                                    nobodySelected = if (nobodySelected == 2) 0 else 2
+                                }
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(Modifier.height(16.dp))
 
-                Text(
-                    text = "Cette personne ment-elle ?",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = TextPrimary,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Mensonge button
+                // Confirm button
+                val hasSelection = selectedIds.isNotEmpty() || nobodySelected == 1
                 Button(
-                    onClick = { viewModel.submitVerdict(isLie = true) },
+                    onClick = {
+                        scope.launch {
+                            val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
+                            val result = playerRepository.applyVerdict(profile, case, liarIds)
+                            onResult(result.isCorrect, result.pointsChange)
+                        }
+                    },
+                    enabled = hasSelection,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RedLie,
-                        contentColor = TextPrimary
-                    )
+                        containerColor = GoldPrimary,
+                        disabledContainerColor = DarkSurfaceVariant
+                    ),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "🔴  MENSONGE",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        "CONFIRMER LE VERDICT",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (hasSelection) DarkBackground else TextDimmed
                     )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Vérité button
-                Button(
-                    onClick = { viewModel.submitVerdict(isLie = false) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = GreenTruth,
-                        contentColor = NoirDeep
-                    )
-                ) {
-                    Text(
-                        text = "🟢  VÉRITÉ",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            VerdictPhase.REVEAL -> {
-                // -- Reveal: Stamp + Score --
-                VerdictStamp(
-                    isLie = state.challenge?.isLie ?: false,
-                    isCorrect = state.isCorrectVerdict
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // -- Verdict explanation: WHY it's a lie or truth --
-                state.challenge?.let { challenge ->
-                    if (challenge.verdictExplanation.isNotBlank()) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(
-                                    width = 2.dp,
-                                    color = if (state.isCorrectVerdict) GreenTruth else RedLie,
-                                    shape = RoundedCornerShape(12.dp)
-                                ),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Surface)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Lightbulb,
-                                        contentDescription = "Explication",
-                                        tint = Gold,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = if (state.isCorrectVerdict) "Bien vu !" else "Explication",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = if (state.isCorrectVerdict) GreenTruth else Gold,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = if (state.isCorrectVerdict)
-                                        "Votre instinct était bon. ${challenge.verdictExplanation}"
-                                    else
-                                        "Vous vous êtes trompé. ${challenge.verdictExplanation}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextPrimary,
-                                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Score
-                ScoreCounter(
-                    targetScore = state.intuitionScore,
-                    label = "Score d'intuition"
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // XP
-                XpCounter(
-                    xp = state.xpEarned,
-                    doubled = state.xpDoubled
-                )
-
-                // Daily case multiplier badge
-                if (state.dailyMultiplier > 1) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val mulColor = if (state.dailyMultiplier >= 3) FlameRed else FlameOrange
-                    Card(
-                        modifier = Modifier
-                            .border(1.dp, mulColor, RoundedCornerShape(8.dp)),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = mulColor.copy(alpha = 0.15f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lightbulb,
-                                contentDescription = null,
-                                tint = mulColor,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "×${state.dailyMultiplier} Cas du Jour",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = mulColor
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Credibility & stats
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Surface)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Bilan de l'analyse",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Gold
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            StatItem(
-                                value = "${state.totalPoints}",
-                                label = "Points",
-                                color = Gold
-                            )
-                            StatItem(
-                                value = "${state.credibility}%",
-                                label = "Crédibilité",
-                                color = when {
-                                    state.credibility > 60 -> GreenTruth
-                                    state.credibility > 30 -> Color(0xFFE67E22)
-                                    else -> RedLie
-                                }
-                            )
-                            StatItem(
-                                value = "${state.uselessClicks}",
-                                label = "Clics inutiles",
-                                color = if (state.uselessClicks == 0) GreenTruth else RedLie
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Credibility bar
-                        LinearProgressIndicator(
-                            progress = { state.credibility / 100f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = when {
-                                state.credibility > 60 -> GreenTruth
-                                state.credibility > 30 -> Color(0xFFE67E22)
-                                else -> RedLie
-                            },
-                            trackColor = NoirDeep
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Evaluated tags with accuracy
-                if (state.evaluatedTags.isNotEmpty()) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Surface)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Vos détections",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = Gold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            state.evaluatedTags.forEach { tag ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${tag.type.emoji} ${tag.type.labelRes}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = TextPrimary
-                                    )
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // Points badge
-                                        if (tag.pointsEarned > 0) {
-                                            Text(
-                                                text = "+${tag.pointsEarned}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = Gold,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                        // Accuracy badge
-                                        Text(
-                                            text = when (tag.accuracy) {
-                                                TagAccuracy.PERFECT -> "🟢 Parfait"
-                                                TagAccuracy.ANTICIPATION -> "🟠 Anticipation"
-                                                TagAccuracy.USELESS -> "⚫ Inutile"
-                                                TagAccuracy.MISSED -> "🔴 Manqué"
-                                                null -> when (tag.isCorrect) {
-                                                    true -> "✓ Juste"
-                                                    false -> "✗ Faux"
-                                                    null -> "—"
-                                                }
-                                            },
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = when (tag.accuracy) {
-                                                TagAccuracy.PERFECT -> GreenTruth
-                                                TagAccuracy.ANTICIPATION -> Color(0xFFE67E22)
-                                                TagAccuracy.USELESS -> TextSecondary
-                                                TagAccuracy.MISSED -> RedLie
-                                                null -> when (tag.isCorrect) {
-                                                    true -> GreenTruth
-                                                    false -> RedLie
-                                                    null -> TextSecondary
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Double XP ad button
-                if (!state.xpDoubled && state.isDoubleXpAdReady) {
-                    OutlinedButton(
-                        onClick = {
-                            (context as? Activity)?.let { activity ->
-                                adManager.showDoubleXpAd(
-                                    activity = activity,
-                                    onRewarded = { viewModel.doubleXp() },
-                                    onDismissed = { }
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = ButtonDefaults.outlinedButtonBorder(enabled = true),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Gold
-                        )
-                    ) {
-                        Text(
-                            text = "🎬  Doubler les XP (pub)",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                // Action buttons
-                // Replay button (only if there are truth tags to review)
-                if (state.replaySegments.isNotEmpty()) {
-                    Button(
-                        onClick = { viewModel.goToReplay() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Gold,
-                            contentColor = NoirDeep
-                        )
-                    ) {
-                        Icon(Icons.Default.Replay, contentDescription = "Analyse détaillée", modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Analyse détaillée", fontWeight = FontWeight.Bold)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                Button(
-                    onClick = onGoToLesson,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (state.replaySegments.isEmpty()) Gold else Surface,
-                        contentColor = if (state.replaySegments.isEmpty()) NoirDeep else TextPrimary
-                    )
-                ) {
-                    Icon(Icons.Default.School, contentDescription = "Voir la leçon", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Voir la leçon", fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedButton(
-                    onClick = onGoHome,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
-                ) {
-                    Icon(Icons.Default.VideoLibrary, contentDescription = "Nouvelle analyse", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Nouvelle analyse")
-                }
-            }
-
-            VerdictPhase.REPLAY -> {
-                // -- Pedagogical Replay --
-                Text(
-                    text = "ANALYSE DÉTAILLÉE",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = Gold,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Chaque indice de la vidéo, dans l'ordre chronologique",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Show each replay segment as a card
-                state.replaySegments.forEachIndexed { index, segment ->
-                    ReplaySegmentCard(
-                        index = index + 1,
-                        segment = segment
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                // Show useless clicks summary if any
-                if (state.uselessClicks > 0) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(
-                                width = 1.dp,
-                                color = TextSecondary.copy(alpha = 0.3f),
-                                shape = RoundedCornerShape(12.dp)
-                            ),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Surface)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "⚫ Clics hors cible: ${state.uselessClicks}",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Pénalité: -${state.uselessClicks * 10} points · -${state.uselessClicks * 15} crédibilité",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = RedLie
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Conseil: Observez attentivement avant de cliquer. Chaque clic aléatoire réduit votre score.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Continue to lesson
-                Button(
-                    onClick = onGoToLesson,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Gold,
-                        contentColor = NoirDeep
-                    )
-                ) {
-                    Icon(Icons.Default.School, contentDescription = "Voir la leçon", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Voir la leçon", fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedButton(
-                    onClick = onGoHome,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
-                ) {
-                    Icon(Icons.Default.VideoLibrary, contentDescription = "Nouvelle analyse", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Nouvelle analyse")
-                }
-            }
-
-            VerdictPhase.LESSON -> {
-                LaunchedEffect(Unit) {
-                    onGoToLesson()
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun StatItem(value: String, label: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge,
-            color = color,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary
-        )
-    }
-}
-
-@Composable
-private fun ReplaySegmentCard(index: Int, segment: ReplaySegment) {
-    val borderColor = when (segment.accuracy) {
-        TagAccuracy.PERFECT -> GreenTruth
-        TagAccuracy.ANTICIPATION -> Color(0xFFE67E22)
-        TagAccuracy.MISSED -> RedLie
-        TagAccuracy.USELESS -> TextSecondary
-    }
-
-    Card(
+private fun SuspectVerdictCard(
+    suspect: Suspect,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 2.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(12.dp)
+            .clickable(onClick = onClick)
+            .then(
+                if (isSelected) Modifier.border(2.dp, VerdictWrong, RoundedCornerShape(16.dp))
+                else Modifier
             ),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Surface)
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) VerdictWrong.copy(alpha = 0.1f) else DarkCard
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Header: accuracy badge + type
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = segment.accuracy.emoji,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Column {
-                        Text(
-                            text = "${segment.truthTag.type.emoji} ${segment.truthTag.type.labelRes}",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = TextPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "à ${formatTimestamp(segment.truthTag.timestampMs)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary
-                        )
-                    }
-                }
-
-                // Points or status
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = segment.accuracy.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = borderColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (segment.pointsEarned > 0) {
-                        Text(
-                            text = "+${segment.pointsEarned} pts",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Gold,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Timing info
-            if (segment.playerTag != null) {
-                val delta = segment.playerTag.timestampMs - segment.truthTag.timestampMs
-                val deltaText = when {
-                    delta > 0 -> "+${delta}ms après"
-                    delta < 0 -> "${-delta}ms avant"
-                    else -> "pile au moment"
-                }
-                Text(
-                    text = "Votre clic: ${formatTimestamp(segment.playerTag.timestampMs)} ($deltaText)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            } else {
-                Text(
-                    text = "❌ Vous n'avez pas détecté cet indice",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = RedLie
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-
-            // Explanation
-            if (segment.explanation.isNotBlank()) {
-                HorizontalDivider(
-                    color = borderColor.copy(alpha = 0.3f),
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-                Text(
-                    text = "💡 ${segment.explanation}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextPrimary
-                )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SuspectAvatar(config = suspect.avatar, clues = suspect.indices, size = 48.dp)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = suspect.nom,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isSelected) VerdictWrong else TextWhite,
+                modifier = Modifier.weight(1f)
+            )
+            if (isSelected) {
+                Icon(Icons.Default.Check, contentDescription = null, tint = VerdictWrong)
             }
         }
     }
 }
 
-private fun formatTimestamp(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "${minutes}:${seconds.toString().padStart(2, '0')}"
+@Composable
+private fun SpecialOption(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .then(
+                if (isSelected) Modifier.border(2.dp, GoldPrimary, RoundedCornerShape(16.dp))
+                else Modifier
+            ),
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) GoldPrimary.copy(alpha = 0.1f) else DarkSurfaceVariant
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            color = if (isSelected) GoldPrimary else TextGray,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 }

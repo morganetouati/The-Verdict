@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -67,11 +68,6 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    // ExoPlayer (Media3)
-    implementation("androidx.media3:media3-exoplayer:1.5.1")
-    implementation("androidx.media3:media3-exoplayer-hls:1.5.1")
-    implementation("androidx.media3:media3-ui:1.5.1")
-
     // Splash Screen
     implementation("androidx.core:core-splashscreen:1.0.1")
 
@@ -81,9 +77,7 @@ dependencies {
     // DataStore (preferences)
     implementation("androidx.datastore:datastore-preferences:1.1.2")
 
-    // Coil (image loading)
-    implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Google Fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts")
+    // JSON Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }

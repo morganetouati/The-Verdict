@@ -1,0 +1,137 @@
+[
+  {
+    "id": 1,
+    "titre": "Le devoir copié",
+    "texte": "Deux élèves ont rendu un devoir identique. L'un d'eux a copié sur l'autre. Qui ment ?",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Lucas", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai fait mon devoir tout seul, je vous jure !", "indices": ["REGARDE_AILLEURS", "TRANSPIRE"]},
+      {"id": 2, "nom": "Emma", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai travaillé à la bibliothèque hier soir.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 2,
+    "titre": "La vitre brisée",
+    "texte": "Une vitre de la salle de classe a été brisée pendant la récréation. Trois élèves étaient dans la cour.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Nathan", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Moi j'étais près du terrain de foot, loin de la salle.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Chloé", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je n'ai rien vu, j'étais avec mes amies.", "indices": ["HESITE", "EVITE_REGARD"]},
+      {"id": 3, "nom": "Théo", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "C'est pas moi ! Je lisais un livre sous le préau.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 3,
+    "titre": "Le goûter volé",
+    "texte": "Le goûter de Mélanie a disparu de son sac pendant le cours de sport. Deux élèves sont restés dans le vestiaire.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Léo", "avatar": {"skinTone": 3, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je suis resté parce que j'avais mal au ventre, c'est tout.", "indices": ["NERVEUX", "MAINS_TREMBLENT"]},
+      {"id": 2, "nom": "Jade", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "J'étais au vestiaire pour chercher mon manteau.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 4,
+    "titre": "Le mot sur le tableau",
+    "texte": "Quelqu'un a écrit une insulte sur le tableau pendant la pause. Le prof cherche le coupable.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Inès", "avatar": {"skinTone": 2, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je suis sortie de la classe tout de suite à la pause.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Enzo", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "J'étais dans la classe mais je jouais sur mon téléphone.", "indices": ["SE_CONTREDIT", "PARLE_VITE"]},
+      {"id": 3, "nom": "Sarah", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 1, "expression": 0}, "phrase": "Je suis restée à discuter avec Inès dans le couloir.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 5,
+    "titre": "Le ballon crevé",
+    "texte": "Le ballon de football neuf a été retrouvé crevé dans la cour. Le surveillant interroge les derniers utilisateurs.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Hugo", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "On a joué avec mais il allait bien quand j'ai fini.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Lina", "avatar": {"skinTone": 4, "hairStyle": 3, "hairColor": 5, "accessory": 0, "expression": 0}, "phrase": "Moi je l'ai juste tapé un peu, mais après il était par terre dégonflé.", "indices": ["SOURIT_TROP", "HISTOIRE_FLOUE"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 6,
+    "titre": "Le livre déchiré",
+    "texte": "Un livre de la bibliothèque a été retrouvé déchiré. L'élève qui l'a emprunté dit que ce n'est pas lui.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Raphaël", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Le livre était déjà un peu abîmé quand je l'ai eu.", "indices": ["DETAIL_SUSPECT", "NERVEUX"]},
+      {"id": 2, "nom": "Camille", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Je n'ai pas touché ce livre depuis la semaine dernière.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Mathis", "avatar": {"skinTone": 3, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai vu Raphaël avec le livre hier, il avait l'air énervé.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 7,
+    "titre": "Le téléphone caché",
+    "texte": "Un téléphone a été confisqué en classe, mais l'élève un peu plus loin prétend que ce n'est pas le sien.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Maëlys", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 3, "accessory": 2, "expression": 0}, "phrase": "Mon téléphone est dans mon sac, vous pouvez vérifier.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Tom", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "C'est pas mon téléphone ! Le mien est chez moi.", "indices": ["VOIX_CHANGE", "TRANSPIRE"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 8,
+    "titre": "La trousse disparue",
+    "texte": "La trousse de la maîtresse a disparu de son bureau. Elle soupçonne un élève de l'avoir cachée comme blague.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Axel", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "J'ai rien fait ! Pourquoi c'est toujours moi qu'on accuse ?", "indices": ["REPOND_VITE", "BRAS_CROISES"]},
+      {"id": 2, "nom": "Zoé", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "J'étais à ma place toute la matinée.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Jules", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Euh... moi non plus j'ai rien fait. Enfin... je crois.", "indices": ["HESITE", "SOURIT_TROP", "REGARDE_AILLEURS"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 9,
+    "titre": "Le dessin moqueur",
+    "texte": "Un dessin moqueur du professeur a été trouvé sur un bureau. Deux élèves sont soupçonnés.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Léna", "avatar": {"skinTone": 3, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je sais même pas dessiner, demandez à mes camarades.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Romain", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "C'est pas mon bureau ! J'étais assis de l'autre côté !", "indices": ["PARLE_VITE", "MAINS_TREMBLENT"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 10,
+    "titre": "La fuite à l'examen",
+    "texte": "Quelqu'un a pris en photo les questions de l'examen et les a partagées. Le directeur interroge les suspects.",
+    "theme": "ECOLE",
+    "difficulte": 1,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Clara", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je n'avais même pas mon téléphone ce jour-là.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Yanis", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Moi ? Non jamais, je révise toujours sérieusement.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Manon", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "J'ai peut-être vu les questions mais c'est parce que quelqu'un me les a envoyées !", "indices": ["SE_CONTREDIT", "TRANSPIRE", "HISTOIRE_FLOUE"]}
+    ],
+    "coupableIds": [3]
+  }
+]

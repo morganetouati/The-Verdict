@@ -1,0 +1,159 @@
+[
+  {
+    "id": 71,
+    "titre": "Le sommet secret",
+    "texte": "Lors d'un sommet international, un document classifié a disparu. Cinq délégués avaient accès à la salle.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Délégué français (Moreau)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "J'ai quitté la salle à 14h pour un appel, le document y était encore.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Délégué allemand (Weber)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je suis resté assis toute la session, je n'ai rien pris.", "indices": ["EVITE_REGARD", "MAINS_TREMBLENT"]},
+      {"id": 3, "nom": "Délégué japonais (Tanaka)", "avatar": {"skinTone": 4, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Le document ne concerne pas mon pays directement.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Déléguée brésilienne (Santos)", "avatar": {"skinTone": 2, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai photographié l'agenda, pas les documents classifiés.", "indices": ["CONFIANT"]},
+      {"id": 5, "nom": "Interprète (Kowalski)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Je traduis les discours, je ne touche pas aux papiers.", "indices": ["NERVEUX"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 72,
+    "titre": "Le virus numérique",
+    "texte": "Un virus sophistiqué a été introduit dans le réseau d'une banque centrale. L'attaque vient de l'intérieur.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Directeur IT (Schneider)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Mon équipe surveille le réseau 24h/24, c'est impossible de l'intérieur.", "indices": ["SE_CONTREDIT", "TRANSPIRE"]},
+      {"id": 2, "nom": "Analyste sécurité (Kim)", "avatar": {"skinTone": 4, "hairStyle": 2, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai détecté le virus le premier et lancé l'alerte.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Développeur (Novak)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Le code du virus ne ressemble pas à notre stack technique.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Stagiaire (Julie)", "avatar": {"skinTone": 1, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je n'ai même pas les droits administrateur sur le réseau.", "indices": ["CONFIANT"]},
+      {"id": 5, "nom": "Consultant externe (Harris)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Mon accès est limité et surveillé, vérifiez les logs.", "indices": ["BRAS_CROISES"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 73,
+    "titre": "Le complot financier",
+    "texte": "Un délit d'initié massif a eu lieu avant une annonce boursière. Les montants en jeu sont colossaux.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "DEUX_MENTEURS",
+    "suspects": [
+      {"id": 1, "nom": "PDG (Mme Durand)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "L'annonce était confidentielle, je n'en ai parlé à personne.", "indices": ["HISTOIRE_FLOUE", "VOIX_CHANGE"]},
+      {"id": 2, "nom": "CFO (M. Blanc)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Les chiffres sont protégés, seul le conseil y accède.", "indices": ["SOURIT_TROP", "PARLE_VITE"]},
+      {"id": 3, "nom": "Avocate (Me Robin)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai rédigé l'annonce mais je ne trade pas en bourse.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Banquier (M. Shah)", "avatar": {"skinTone": 3, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Mes clients investissent sur mes conseils publics uniquement.", "indices": ["TROP_CALME"]},
+      {"id": 5, "nom": "Assistante (Léna)", "avatar": {"skinTone": 2, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Je gère les agendas, pas les informations financières.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1, 2]
+  },
+  {
+    "id": 74,
+    "titre": "Le procès du siècle",
+    "texte": "Un magnat de l'immobilier est accusé de corruption systémique. Les témoins clés se contredisent.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Le magnat (Delacroix)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Mes affaires sont transparentes, auditées chaque année.", "indices": ["REGARDE_AILLEURS", "DETAIL_SUSPECT", "SE_CONTREDIT"]},
+      {"id": 2, "nom": "Adjoint au maire", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les permis ont été accordés dans les règles.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Comptable (Morel)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les comptes que j'ai vus étaient propres.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Ex-associé (Vernet)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Delacroix paie des pots-de-vin depuis des années, j'ai des preuves.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 75,
+    "titre": "L'évasion planifiée",
+    "texte": "Un prisonnier de haute sécurité a failli s'évader. Quelqu'un de l'intérieur l'a aidé.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Gardien chef (Martinez)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Mon équipe a empêché l'évasion, nous avons fait notre travail.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Gardien (Dumont)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "J'étais en ronde quand l'alarme a sonné.", "indices": ["TRANSPIRE", "HESITE", "MAINS_TREMBLENT"]},
+      {"id": 3, "nom": "Psychologue (Dr. Levy)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 2, "accessory": 1, "expression": 0}, "phrase": "Mon rôle est thérapeutique, je n'ai accès à aucune clé.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Directrice (Mme Torres)", "avatar": {"skinTone": 3, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Une enquête interne est déjà ouverte.", "indices": ["CONFIANT"]},
+      {"id": 5, "nom": "Avocate du détenu", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Mon client a le droit de demander un transfert légalement.", "indices": ["BRAS_CROISES"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 76,
+    "titre": "Le diplomate assassiné",
+    "texte": "Un diplomate a été retrouvé empoisonné dans sa chambre d'hôtel. L'enquête doit être discrète.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Garde du corps (Sergei)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais posté devant la porte toute la nuit.", "indices": ["NERVEUX", "EVITE_REGARD"]},
+      {"id": 2, "nom": "Femme de chambre (Maria)", "avatar": {"skinTone": 2, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "J'ai fait le service du soir à 20h, il allait bien.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Collègue diplomate (Anderson)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 2, "accessory": 1, "expression": 0}, "phrase": "Nous avons dîné ensemble au restaurant de l'hôtel.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Room service (Yuki)", "avatar": {"skinTone": 4, "hairStyle": 2, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai livré un en-cas vers 23h, il a ouvert la porte lui-même.", "indices": ["CONFIANT"]},
+      {"id": 5, "nom": "Concierge (Pierre)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Personne d'inconnu n'est monté à l'étage cette nuit.", "indices": ["REPOND_VITE"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 77,
+    "titre": "La trahison au sommet",
+    "texte": "Le plan de défense national a été vendu à une puissance hostile. La fuite vient du plus haut niveau.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Général (De Villiers)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "J'ai défendu ce pays pendant 35 ans, c'est une insulte.", "indices": ["BRAS_CROISES"]},
+      {"id": 2, "nom": "Conseiller présidentiel (Maxime)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Seuls 4 personnes avaient accès à ce document.", "indices": ["PARLE_VITE", "HISTOIRE_FLOUE", "TRANSPIRE"]},
+      {"id": 3, "nom": "Chef du renseignement (Mme Serval)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Mes services ont détecté la fuite, nous ne sommes pas la source.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Ministre de la Défense", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai ordonné une enquête dès la découverte.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 78,
+    "titre": "Le testament du milliardaire",
+    "texte": "Un milliardaire est mort subitement. Son testament, modifié la veille, avantage un seul héritier. Empoisonnement ?",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "TOUS_MENTENT",
+    "suspects": [
+      {"id": 1, "nom": "Fils aîné (Alexandre)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je ne savais pas que le testament avait été modifié.", "indices": ["REGARDE_AILLEURS", "SOURIT_TROP"]},
+      {"id": 2, "nom": "Seconde épouse (Natalia)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 4, "accessory": 2, "expression": 0}, "phrase": "Mon mari m'avait promis la moitié, c'est normal.", "indices": ["VOIX_CHANGE", "SE_CONTREDIT"]},
+      {"id": 3, "nom": "Notaire (Me Berthelot)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Le testament a été rédigé selon les volontés du défunt.", "indices": ["DETAIL_SUSPECT", "NERVEUX"]},
+      {"id": 4, "nom": "Majordome (Alfred)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Monsieur allait très bien la veille au soir.", "indices": ["MAINS_TREMBLENT", "HESITE"]}
+    ],
+    "coupableIds": [1, 2, 3, 4]
+  },
+  {
+    "id": 79,
+    "titre": "L'opération fantôme",
+    "texte": "Une opération secrète a été compromise. Tous les membres de l'équipe se rejettent la responsabilité.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Chef d'équipe (Atlas)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Le briefing était sécurisé, la fuite vient d'ailleurs.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Technicien (Ghost)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Mes communications sont toutes cryptées.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Éclaireur (Shadow)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais en reconnaissance, je n'avais pas les détails complets.", "indices": ["EVITE_REGARD", "TRANSPIRE", "VOIX_CHANGE"]},
+      {"id": 4, "nom": "Spécialiste (Phoenix)", "avatar": {"skinTone": 3, "hairStyle": 2, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Mon pager a été volé la semaine dernière, c'est peut-être lié.", "indices": ["CONFIANT"]},
+      {"id": 5, "nom": "Officier liaison (Viper)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 3, "accessory": 1, "expression": 0}, "phrase": "J'ai transmis les ordres exactement comme reçus.", "indices": ["BRAS_CROISES"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 80,
+    "titre": "Le verdict final",
+    "texte": "Un juge est accusé de corruption après des décisions de justice controversées. L'affaire secoue tout le système.",
+    "theme": "ELITE",
+    "difficulte": 5,
+    "type": "DEUX_MENTEURS",
+    "suspects": [
+      {"id": 1, "nom": "Juge (Mme Renard)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Mes décisions sont fondées sur le droit, rien d'autre.", "indices": ["HESITE", "NERVEUX", "HISTOIRE_FLOUE"]},
+      {"id": 2, "nom": "Avocat (Me Castelli)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Le juge a toujours été impartial dans mes affaires.", "indices": ["SOURIT_TROP", "REGARDE_AILLEURS"]},
+      {"id": 3, "nom": "Greffier (Thomas)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "J'ai remarqué des rendez-vous non officiels au palais de justice.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Procureur (Me Vidal)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les décisions étaient légales même si discutables.", "indices": ["TROP_CALME"]},
+      {"id": 5, "nom": "Journaliste (Lucie)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Mes sources sont formelles, des enveloppes ont circulé.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1, 2]
+  }
+]

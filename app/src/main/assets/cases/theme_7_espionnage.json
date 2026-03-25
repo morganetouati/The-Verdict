@@ -1,0 +1,152 @@
+[
+  {
+    "id": 61,
+    "titre": "La taupe de l'agence",
+    "texte": "Une taupe infiltrée transmet des informations classifiées à une puissance étrangère. L'enquête interne est lancée.",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Agent Duval", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je suis en poste depuis 15 ans sans aucune faute.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Agent Mercier", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "J'ai accès aux dossiers mais tout est traçable.", "indices": ["NERVEUX", "EVITE_REGARD", "TRANSPIRE"]},
+      {"id": 3, "nom": "Agent Chen", "avatar": {"skinTone": 4, "hairStyle": 2, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Mes origines n'ont rien à voir avec cette affaire.", "indices": ["BRAS_CROISES"]},
+      {"id": 4, "nom": "Directrice Lambert", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "J'ai moi-même ouvert l'enquête, pourquoi me soupçonner ?", "indices": ["TROP_CALME"]},
+      {"id": 5, "nom": "Analyste Fournier", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je ne vois que les données brutes, jamais les sources.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 62,
+    "titre": "Le message codé",
+    "texte": "Un message chiffré a été intercepté, destiné à un agent dormant. Qui dans le cercle diplomatique est l'espion ?",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Ambassadeur Blanc", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Ma position m'interdit tout contact non officiel.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Attaché culturel (Martin)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je ne m'occupe que d'événements culturels.", "indices": ["REGARDE_AILLEURS", "HISTOIRE_FLOUE"]},
+      {"id": 3, "nom": "Traductrice (Olga)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je traduis des documents officiels, rien de secret.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Chauffeur (Henri)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je conduis la voiture, je ne lis pas les courriers.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 63,
+    "titre": "Opération Miroir",
+    "texte": "Un agent double prétend travailler pour les deux camps. Mais qui contrôle-t-il vraiment ?",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "DEUX_MENTEURS",
+    "suspects": [
+      {"id": 1, "nom": "Agent double (Viktor)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je travaille pour vous, mes informations ont toujours été fiables.", "indices": ["SE_CONTREDIT", "SOURIT_TROP"]},
+      {"id": 2, "nom": "Officier traitant (Masson)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Viktor est sous mon contrôle depuis le début.", "indices": ["MAINS_TREMBLENT", "PARLE_VITE"]},
+      {"id": 3, "nom": "Analyste (Dr. Roux)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 2, "accessory": 1, "expression": 0}, "phrase": "Les données de Viktor ont toujours été vérifiées.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Chef des opérations (Girard)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Si Viktor ment, Masson devrait le savoir.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [1, 2]
+  },
+  {
+    "id": 64,
+    "titre": "Le micro caché",
+    "texte": "Un micro espion a été trouvé dans le bureau du ministre. Qui l'a posé lors de la dernière réunion ?",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Secrétaire (Mme Andre)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai simplement posé les dossiers sur la table, rien d'autre.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Technicien (Paul)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai vérifié la salle avant la réunion comme d'habitude.", "indices": ["DETAIL_SUSPECT", "TRANSPIRE", "HESITE"]},
+      {"id": 3, "nom": "Conseiller (Étienne)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 2, "accessory": 1, "expression": 0}, "phrase": "Je suis arrivé après tout le monde, la salle était prête.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Journaliste (Sylvie)", "avatar": {"skinTone": 2, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Je n'ai eu accès au bureau qu'avec un accompagnant.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 65,
+    "titre": "La valise diplomatique",
+    "texte": "Du matériel interdit a été trouvé dans une valise diplomatique. Qui l'y a mis ?",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Diplomate (Fontaine)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "La valise était scellée à mon arrivée.", "indices": ["VOIX_CHANGE", "NERVEUX", "SE_CONTREDIT"]},
+      {"id": 2, "nom": "Courrier (Jean-Marc)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai transporté la valise du point A au point B, c'est tout.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Agent de sécurité (Moussa)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les valises diplomatiques ne sont pas scannées, c'est le protocole.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Réceptionniste (Claire)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je n'ai fait qu'enregistrer l'arrivée de la valise.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 66,
+    "titre": "Le rendez-vous manqué",
+    "texte": "Un échange d'informations devait avoir lieu dans un parc. L'agent ne s'est jamais présenté. Qui l'a prévenu ?",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Coordinateur (Bernard)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Seuls trois personnes connaissaient le lieu du rendez-vous.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Opératrice radio (Inès)", "avatar": {"skinTone": 2, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "J'ai transmis les coordonnées exactement comme convenu.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Agent terrain (Luc)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais en position d'observation, personne n'est venu.", "indices": ["REPOND_VITE", "REGARDE_AILLEURS", "HISTOIRE_FLOUE"]},
+      {"id": 4, "nom": "Logisticien (Rémi)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai préparé l'équipement, la mission était standard.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 67,
+    "titre": "Le coffre-fort ouvert",
+    "texte": "Le coffre-fort d'une ambassade a été ouvert sans effraction. Seules 4 personnes connaissaient le code.",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "L'ambassadeur", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je n'ai pas ouvert le coffre depuis la semaine dernière.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Premier conseiller", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Le code n'a pas été changé depuis des mois, c'est un problème.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Chef de la sécurité", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai vérifié le coffre à 22h, il était fermé.", "indices": ["EVITE_REGARD", "MAINS_TREMBLENT", "TRANSPIRE"]},
+      {"id": 4, "nom": "Attaché militaire", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je n'utilise le coffre que pour les documents classifiés défense.", "indices": ["BRAS_CROISES"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 68,
+    "titre": "Le faux passeport",
+    "texte": "Un faux passeport a été détecté à la frontière. Le porteur nie toute implication dans sa fabrication.",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "TOUS_MENTENT",
+    "suspects": [
+      {"id": 1, "nom": "Le porteur (Alex)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "On m'a donné ce passeport, je ne savais pas qu'il était faux.", "indices": ["HESITE", "NERVEUX"]},
+      {"id": 2, "nom": "Le faussaire présumé", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je n'ai jamais fabriqué de documents frauduleux.", "indices": ["REGARDE_AILLEURS", "PARLE_VITE"]},
+      {"id": 3, "nom": "Le commanditaire", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je ne connais ni Alex ni ce faussaire.", "indices": ["SE_CONTREDIT", "HISTOIRE_FLOUE"]}
+    ],
+    "coupableIds": [1, 2, 3]
+  },
+  {
+    "id": 69,
+    "titre": "La photo compromettante",
+    "texte": "Une photo montre un haut fonctionnaire avec un agent étranger. Qui a pris et diffusé cette photo ?",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Photographe (Denis)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je photographie les événements officiels, c'est mon travail.", "indices": ["SOURIT_TROP", "DETAIL_SUSPECT", "VOIX_CHANGE"]},
+      {"id": 2, "nom": "Assistant (Léa)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai accès aux photos mais elles sont toutes archivées.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Garde du corps (Kamel)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'escorte le fonctionnaire, je ne prends pas de photos.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Fonctionnaire (Dubois)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "C'était une rencontre fortuite, rien de prémédité.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 70,
+    "titre": "Le satellite piraté",
+    "texte": "Un satellite de communication a été compromis. Les données ont été redirigées pendant 12 heures.",
+    "theme": "ESPIONNAGE",
+    "difficulte": 4,
+    "type": "AUCUN_MENTEUR",
+    "suspects": [
+      {"id": 1, "nom": "Ingénieur satellite (Dr. Park)", "avatar": {"skinTone": 4, "hairStyle": 1, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Le piratage vient de l'extérieur, nos systèmes internes sont sûrs.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Opérateur (Cédric)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les anomalies sont apparues à 3h du matin, j'étais hors service.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Responsable sécurité (Major Denis)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Nos pare-feux n'ont pas été franchis de l'intérieur.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Sous-traitant (TechCorp)", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Notre contrat ne couvre pas la sécurité satellite.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": []
+  }
+]

@@ -1,0 +1,153 @@
+[
+  {
+    "id": 51,
+    "titre": "Le double jeu",
+    "texte": "Un informateur de la police est soupçonné de jouer double jeu. L'enquêteur doit déterminer qui ment parmi les suspects.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "L'Informateur (Samir)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je risque ma vie pour la police, pourquoi je trahirais ?", "indices": ["NERVEUX", "TRANSPIRE"]},
+      {"id": 2, "nom": "Le Capitaine (Boyer)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Samir est fiable, je travaille avec lui depuis 3 ans.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "L'Agent (Marion)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Les informations données ne collent plus depuis 2 mois.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Le Suspect (Rédouane)", "avatar": {"skinTone": 3, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je ne connais pas d'informateur, on ne m'a jamais parlé de ça.", "indices": ["EVITE_REGARD", "HISTOIRE_FLOUE"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 52,
+    "titre": "La scène truquée",
+    "texte": "La scène de crime semble avoir été arrangée. Les preuves ne collent pas avec le témoignage principal.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Premier témoin (Gaëlle)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "J'ai trouvé le corps en rentrant, j'ai appelé la police.", "indices": ["SE_CONTREDIT", "VOIX_CHANGE", "MAINS_TREMBLENT"]},
+      {"id": 2, "nom": "Ex-mari (Fabrice)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je n'ai aucune raison de venir ici, nous sommes divorcés.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Voisin (Daniel)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "J'ai entendu un bruit vers 23h, c'est tout ce que je sais.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Ami (Sabrina)", "avatar": {"skinTone": 2, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Gaëlle m'a appelée juste avant la police, elle paniquait.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 53,
+    "titre": "Le réseau fantôme",
+    "texte": "Un réseau de revente de produits volés opère depuis un marché. Personne ne semble coupable.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "AUCUN_MENTEUR",
+    "suspects": [
+      {"id": 1, "nom": "Le boucher (Gilles)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je vends ma viande, je ne connais pas ces histoires.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "La fleuriste (Rose)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Mon stand est trop petit pour cacher quoi que ce soit.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Le brocanteur (Marcel)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Mes objets sont tous avec facture d'origine.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Le maraîcher (Ahmed)", "avatar": {"skinTone": 3, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Le réseau opère ailleurs, pas ici au marché.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": []
+  },
+  {
+    "id": 54,
+    "titre": "L'identité volée",
+    "texte": "Quelqu'un utilise l'identité d'un citoyen pour commettre des fraudes. L'enquêteur confronte les suspects.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Le comptable (Patrice)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "J'ai accès aux données mais jamais je n'en abuserais.", "indices": ["HESITE", "TRANSPIRE", "DETAIL_SUSPECT"]},
+      {"id": 2, "nom": "La collègue (Virginie)", "avatar": {"skinTone": 1, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je n'ai pas accès au fichier clients.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Le stagiaire (Maxence)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je suis arrivé il y a deux mois, je connais à peine les logiciels.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "La DRH (Corinne)", "avatar": {"skinTone": 2, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Nos systèmes sont protégés, ça vient forcément de l'intérieur.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 55,
+    "titre": "Le poison lent",
+    "texte": "Un patient montre des signes d'empoisonnement progressif. Son entourage est soupçonné.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "L'épouse (Hélène)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Mon mari est tout pour moi, je suis dévastée.", "indices": ["SOURIT_TROP", "TROP_CALME"]},
+      {"id": 2, "nom": "L'infirmière (Julie)", "avatar": {"skinTone": 1, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je lui donne ses médicaments prescrits, rien de plus.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Le fils (Aurélien)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je vis à 200km, je ne viens que le week-end.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "L'aide-soignante (Fatou)", "avatar": {"skinTone": 4, "hairStyle": 2, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je prépare les repas mais l'épouse supervise toujours.", "indices": ["NERVEUX"]},
+      {"id": 5, "nom": "Le voisin (René)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "J'apporte parfois des plats cuisinés, par gentillesse.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 56,
+    "titre": "Le maquillage des comptes",
+    "texte": "Les comptes d'une association montrent des irrégularités. Qui détourne les fonds ?",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "DEUX_MENTEURS",
+    "suspects": [
+      {"id": 1, "nom": "Le président (Gérard)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je valide les dépenses mais c'est le trésorier qui gère.", "indices": ["HISTOIRE_FLOUE", "REGARDE_AILLEURS"]},
+      {"id": 2, "nom": "Le trésorier (Alain)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Le président approuve toutes les dépenses, pas moi.", "indices": ["SE_CONTREDIT", "PARLE_VITE"]},
+      {"id": 3, "nom": "La secrétaire (Monique)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je n'ai aucun pouvoir financier, je fais le courrier.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Le bénévole (Sébastien)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je viens le samedi aider, je ne vois jamais les comptes.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [1, 2]
+  },
+  {
+    "id": 57,
+    "titre": "La disparition suspecte",
+    "texte": "Une femme a disparu depuis 48h. Son entourage donne des versions contradictoires.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Le mari (Philippe)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Elle est partie faire des courses et n'est jamais revenue.", "indices": ["EVITE_REGARD", "VOIX_CHANGE", "NERVEUX"]},
+      {"id": 2, "nom": "L'amie (Carole)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Elle m'avait dit vouloir quitter son mari depuis des mois.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Le collègue (Bruno)", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Elle était normale au travail vendredi, rien de suspect.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "La mère (Jacqueline)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 5, "accessory": 0, "expression": 0}, "phrase": "Ma fille ne partirait jamais sans prévenir.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 58,
+    "titre": "Le dossier médical",
+    "texte": "Des dossiers médicaux confidentiels ont fuité dans la presse. Qui est la source dans l'hôpital ?",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Dr. Moreau", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Je suis lié par le secret médical, jamais je ne parlerais.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Infirmière (Sophie)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "J'ai accès aux dossiers mais uniquement pour les soins.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Secrétaire médicale (Lydia)", "avatar": {"skinTone": 3, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Les dossiers sont numériques, tout le monde peut y accéder.", "indices": ["TRANSPIRE", "MAINS_TREMBLENT", "REPOND_VITE"]},
+      {"id": 4, "nom": "Technicien IT (Kevin)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les logs montrent des accès normaux, rien d'anormal.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 59,
+    "titre": "Les tableaux volés",
+    "texte": "Trois tableaux de valeur ont disparu d'une galerie pendant une réception. L'enquêteur interroge les invités clés.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Le galeriste (François)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "L'assurance couvre le vol, mais ces œuvres sont irremplaçables pour moi.", "indices": ["SOURIT_TROP", "DETAIL_SUSPECT"]},
+      {"id": 2, "nom": "Le collectionneur (M. Wei)", "avatar": {"skinTone": 4, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'aurais pu les acheter légalement, pourquoi les voler ?", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "L'artiste (Camille)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Mes tableaux ont été volés ? C'est... c'est terrible.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Le vigile (Roberto)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les caméras étaient en panne ce soir-là, pas ma faute.", "indices": ["HESITE"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 60,
+    "titre": "L'alibi croisé",
+    "texte": "Deux suspects se fournissent mutuellement un alibi. Mais l'un d'eux ment forcément.",
+    "theme": "ENQUETE",
+    "difficulte": 4,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Marc", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais avec Éric au bar Le Central de 20h à minuit.", "indices": ["PARLE_VITE", "REGARDE_AILLEURS", "SE_CONTREDIT"]},
+      {"id": 2, "nom": "Éric", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Oui, Marc et moi on a passé la soirée ensemble au bar.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Barman (Yann)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je me souviens d'un seul gars ce soir-là, pas de deux.", "indices": ["CONFIANT"]},
+      {"id": 4, "nom": "Serveur (Lily)", "avatar": {"skinTone": 2, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "La salle était quasi vide, j'aurais remarqué deux personnes.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  }
+]

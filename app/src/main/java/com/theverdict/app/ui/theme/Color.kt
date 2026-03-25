@@ -2,29 +2,40 @@ package com.theverdict.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// -- Palette principale "Tribunal Noir Cinématique" --
-val NoirDeep = Color(0xFF0A0A0F)
-val Surface = Color(0xFF14141F)
-val SurfaceLight = Color(0xFF1E1E2E)
-val Gold = Color(0xFFD4A847)
-val GoldDark = Color(0xFFB8922E)
-val GoldLight = Color(0xFFE8C76A)
-val RedLie = Color(0xFFC73E3E)
-val RedLieDark = Color(0xFFA02E2E)
-val GreenTruth = Color(0xFF2ECC71)
-val GreenTruthDark = Color(0xFF229954)
-val TextPrimary = Color(0xFFE8E6E3)
-val TextSecondary = Color(0xFF6B6B7B)
-val TextOnGold = Color(0xFF0A0A0F)
+// Primary palette — Justice / Dark tribunal
+val GoldPrimary = Color(0xFFD4A24C)
+val GoldLight = Color(0xFFE8C97A)
+val GoldDark = Color(0xFFB8862E)
 
-// Overlays
-val OverlayDark = Color(0xCC0A0A0F) // 80% opacity
-val OverlayMedium = Color(0x800A0A0F) // 50% opacity
+// Background
+val DarkBackground = Color(0xFF0D0D0D)
+val DarkSurface = Color(0xFF1A1A1A)
+val DarkSurfaceVariant = Color(0xFF2A2A2A)
+val DarkCard = Color(0xFF222222)
 
-// Lucidité / Feedback
-val NeonBlue = Color(0xFF00C8FF)
-val FlameOrange = Color(0xFFFF6B00)
-val FlameRed = Color(0xFFFF2D2D)
-val CrimeRed = Color(0xFF8B0000)
-val CredibilityGreen = Color(0xFF27AE60)
-val CredibilityAmber = Color(0xFFE67E22)
+// On colors
+val TextWhite = Color(0xFFF5F5F5)
+val TextGray = Color(0xFFAAAAAA)
+val TextDimmed = Color(0xFF666666)
+
+// Verdict colors
+val VerdictCorrect = Color(0xFF4CAF50)
+val VerdictCorrectLight = Color(0xFF81C784)
+val VerdictWrong = Color(0xFFE53935)
+val VerdictWrongLight = Color(0xFFEF5350)
+
+// Rank colors
+val RankDebutant = Color(0xFF9E9E9E)
+val RankJuge = Color(0xFF42A5F5)
+val RankBonJuge = Color(0xFF66BB6A)
+val RankExpert = Color(0xFFAB47BC)
+val RankLegende = Color(0xFFFFD700)
+
+// Clue chip
+val ClueChipBackground = Color(0xFF333333)
+val ClueChipText = Color(0xFFE0E0E0)
+
+// Timer
+val TimerNormal = Color(0xFF42A5F5)
+val TimerWarning = Color(0xFFFF9800)
+val TimerCritical = Color(0xFFE53935)

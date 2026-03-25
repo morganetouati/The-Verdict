@@ -1,0 +1,146 @@
+[
+  {
+    "id": 31,
+    "titre": "Le faux alibi",
+    "texte": "Un cambriolage a eu lieu à 22h. Un suspect prétend être resté chez lui toute la soirée, mais son voisin dit le contraire.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Karim", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais chez moi, j'ai regardé un film. Demandez à ma femme.", "indices": ["HISTOIRE_FLOUE", "EVITE_REGARD", "SE_CONTREDIT"]},
+      {"id": 2, "nom": "Stéphane", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Je travaillais au restaurant jusqu'à minuit, le patron peut confirmer.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Diego", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "J'étais à la salle de sport. J'ai ma carte de paiement comme preuve.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Nadia", "avatar": {"skinTone": 1, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'étais chez ma sœur, on a dîné ensemble.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [1]
+  },
+  {
+    "id": 32,
+    "titre": "Le témoin nerveux",
+    "texte": "Une agression a eu lieu en pleine rue. Trois personnes étaient présentes mais les témoignages divergent.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Youssef", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai essayé d'aider la victime, j'étais le premier sur les lieux.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Franck", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Je passais par là, j'ai rien vu, je marchais vite.", "indices": ["TRANSPIRE", "PARLE_VITE", "NERVEUX"]},
+      {"id": 3, "nom": "Sandra", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "J'étais dans ma voiture garée en face, j'ai tout vu par la vitre.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 33,
+    "titre": "Le colis suspect",
+    "texte": "Un colis de contrebande a été intercepté. L'adresse de livraison pointe vers un appartement avec 3 colocataires.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Amélie", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je reçois souvent des colis pour mon travail d'artisane.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Baptiste", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "C'est pas mon colis ! Quelqu'un a dû utiliser notre adresse.", "indices": ["REPOND_VITE", "MAINS_TREMBLENT"]},
+      {"id": 3, "nom": "Clément", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Je suis jamais là, j'étais en déplacement cette semaine.", "indices": ["TROP_CALME"]},
+      {"id": 4, "nom": "Diane", "avatar": {"skinTone": 2, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Le facteur passe quand je suis au travail.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 34,
+    "titre": "La voiture incendiée",
+    "texte": "Une voiture a été incendiée dans le quartier. Les caméras montrent 3 silhouettes fuyant les lieux.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Jordan", "avatar": {"skinTone": 3, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais en boîte de nuit, j'ai plein de témoins.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Sami", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais chez moi, je jouais en ligne, vous pouvez vérifier ma connexion.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Kévin", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Moi dans le quartier à cette heure ? N'importe quoi !", "indices": ["VOIX_CHANGE", "REGARDE_AILLEURS", "DETAIL_SUSPECT"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 35,
+    "titre": "Le commerçant braqué",
+    "texte": "Une épicerie a été braquée par un individu masqué. Les suspects ont été interpellés à proximité.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Mehdi", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'attendais le bus, c'est pour ça que j'étais dans la rue.", "indices": ["HESITE", "TRANSPIRE"]},
+      {"id": 2, "nom": "Lucie", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Je rentrais du travail à pied comme chaque soir.", "indices": ["CONFIANT"]},
+      {"id": 3, "nom": "Amine", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai couru parce que j'avais peur, c'est tout !", "indices": ["NERVEUX", "PARLE_VITE", "SE_CONTREDIT"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 36,
+    "titre": "Le vélo volé au parc",
+    "texte": "Un vélo haut de gamme a été volé dans un parc public. La victime avait oublié de l'attacher.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Romain", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Je faisais mon jogging, je ne me suis pas arrêté.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Fatima", "avatar": {"skinTone": 3, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'étais assise sur un banc en train de lire.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Alexis", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Le vélo ? Non, euh... j'ai vu un vélo oui, mais bon...", "indices": ["HESITE", "EVITE_REGARD", "MAINS_TREMBLENT"]},
+      {"id": 4, "nom": "Noémie", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 0, "accessory": 2, "expression": 0}, "phrase": "Je promenais mon chien du côté opposé au parking vélo.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 37,
+    "titre": "L'accident suspect",
+    "texte": "Un accident de voiture semble mis en scène pour une arnaque à l'assurance. Les deux conducteurs se rejettent la faute.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Pierre", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Il m'a percuté ! Je roulais normalement.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Hassan", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "C'est un accident, ça arrive. Les dégâts sont importants, voilà.", "indices": ["SOURIT_TROP", "HISTOIRE_FLOUE", "DETAIL_SUSPECT"]},
+      {"id": 3, "nom": "Témoin (Carla)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai vu les deux voitures rouler doucement puis se percuter bizarrement.", "indices": ["TROP_CALME"]}
+    ],
+    "coupableIds": [2]
+  },
+  {
+    "id": 38,
+    "titre": "Le tag sur le mur",
+    "texte": "Un grand tag a été peint sur le mur de la mairie pendant la nuit. Des traces de peinture ont été trouvées.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Léa", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Je suis artiste mais je ne peins que sur toile.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Dylan", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais chez moi, la peinture c'est pas mon style.", "indices": ["REGARDE_AILLEURS", "VOIX_CHANGE"]},
+      {"id": 3, "nom": "Mathis", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Moi ? Jamais ! D'ailleurs les tags c'est nul.", "indices": ["TRANSPIRE", "SE_CONTREDIT", "BRAS_CROISES"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 39,
+    "titre": "La bagarre au bar",
+    "texte": "Une violente bagarre a éclaté dans un bar. Le barman est blessé. Les trois clients présents nient être responsables.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Christophe", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai bu une bière tranquillement, j'ai rien à voir là-dedans.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Marco", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Quand ça a commencé je me suis caché derrière le comptoir.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Thierry", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Le barman m'a provoqué ! Enfin non... j'ai rien fait.", "indices": ["NERVEUX", "SE_CONTREDIT", "PARLE_VITE", "MAINS_TREMBLENT"]}
+    ],
+    "coupableIds": [3]
+  },
+  {
+    "id": 40,
+    "titre": "Le pickpocket du métro",
+    "texte": "Une touriste s'est fait voler son portefeuille dans le métro. La police interpelle des suspects à la sortie.",
+    "theme": "POLICE",
+    "difficulte": 3,
+    "type": "NORMAL",
+    "suspects": [
+      {"id": 1, "nom": "Ivan", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Je sortais du travail, j'ai même pas vu la touriste.", "indices": ["CONFIANT"]},
+      {"id": 2, "nom": "Rachid", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'étais dans le même wagon mais de l'autre côté.", "indices": ["TROP_CALME"]},
+      {"id": 3, "nom": "Tony", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Moi un pickpocket ? Regardez mes poches, elles sont vides !", "indices": ["REPOND_VITE", "SOURIT_TROP", "TRANSPIRE"]},
+      {"id": 4, "nom": "Anna", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'étais assise et j'écoutais de la musique.", "indices": ["CONFIANT"]}
+    ],
+    "coupableIds": [3]
+  }
+]

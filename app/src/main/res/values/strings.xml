@@ -1,43 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">The Verdict</string>
-    <string name="home_title">THE VERDICT</string>
-    <string name="home_subtitle">Lis dans les gens comme dans un livre ouvert</string>
-    <string name="new_case">NOUVELLE AFFAIRE</string>
-    <string name="analyses_remaining">%1$d/5 analyses restantes</string>
-    <string name="watch_ad_unlock">Regarder une pub → +5 analyses</string>
-    <string name="watch_ad_double_xp">Doubler les XP</string>
-    <string name="verdict_lie_detected">MENSONGE DÉTECTÉ</string>
-    <string name="verdict_truth_confirmed">VÉRITÉ CONFIRMÉE</string>
-    <string name="verdict_wrong">MAUVAIS VERDICT</string>
-    <string name="intuition_score">Score d\'Intuition</string>
-    <string name="see_lesson">Voir la Leçon</string>
-    <string name="next_case">Affaire Suivante</string>
-    <string name="profile">Profil</string>
-    <string name="level_novice">Novice</string>
-    <string name="level_detective">Détective</string>
-    <string name="level_mentalist">Mentaliste</string>
-    <string name="level_oracle">Oracle</string>
 
-    <!-- Detection buttons -->
-    <string name="detect_lips">Lèvres pincées</string>
-    <string name="detect_eyes">Blocage oculaire</string>
-    <string name="detect_touch">Auto-contact</string>
+    <!-- Menu -->
+    <string name="menu_title">THE VERDICT</string>
+    <string name="menu_subtitle">Rendez justice. Trouvez le menteur.</string>
+    <string name="menu_play">JOUER</string>
+    <string name="menu_reputation">RÉPUTATION</string>
+    <string name="menu_select_theme">Choisir un thème</string>
 
-    <!-- Lessons -->
-    <string name="lesson_micro_contempt_title">Micro-Mépris</string>
-    <string name="lesson_micro_contempt_desc">Un coin de la lèvre se relève d\'un seul côté. C\'est la seule expression faciale asymétrique, elle indique un sentiment de supériorité.</string>
-    <string name="lesson_eye_block_title">Blocage Oculaire</string>
-    <string name="lesson_eye_block_desc">Les yeux se ferment plus longtemps qu\'un simple clignement. C\'est un mécanisme de défense pour \"effacer\" une réalité dérangeante.</string>
-    <string name="lesson_lip_compress_title">Compression des Lèvres</string>
-    <string name="lesson_lip_compress_desc">Les lèvres forment une ligne droite. La personne retient quelque chose — une émotion ou une information.</string>
-    <string name="lesson_neck_scratch_title">Grattage du Cou</string>
-    <string name="lesson_neck_scratch_desc">La main gratte le côté du cou, sous l\'oreille. Un geste d\'auto-apaisement qui tente de ralentir le rythme cardiaque.</string>
-    <string name="lesson_head_incongruence_title">Incongruence Tête-Message</string>
-    <string name="lesson_head_incongruence_desc">La personne dit \"Oui\" mais sa tête fait un micro-mouvement de gauche à droite. Le corps dit la vérité avant le cerveau.</string>
+    <!-- Case -->
+    <string name="case_new">Nouvelle Affaire</string>
+    <string name="case_theme">Thème : %1$s</string>
+    <string name="case_difficulty">Difficulté : %1$d/5</string>
+    <string name="case_see_suspects">VOIR LES SUSPECTS</string>
+    <string name="case_number">Affaire %1$d/%2$d</string>
 
-    <!-- Ads -->
+    <!-- Suspects -->
+    <string name="suspects_title">Les Suspects</string>
+    <string name="suspects_interrogate">Interroger</string>
+    <string name="suspects_interrogations_left">%1$d interrogation(s) restante(s)</string>
+
+    <!-- Interrogation -->
+    <string name="interrogation_title">Interrogatoire</string>
+    <string name="interrogation_clues">Indices observés</string>
+    <string name="interrogation_back">Retour aux suspects</string>
+
+    <!-- Verdict -->
+    <string name="verdict_title">Votre Verdict</string>
+    <string name="verdict_who_lies">Qui ment ?</string>
+    <string name="verdict_nobody">Personne ne ment</string>
+    <string name="verdict_everyone">Tous mentent</string>
+    <string name="verdict_confirm">CONFIRMER LE VERDICT</string>
+    <string name="verdict_select_liar">Sélectionnez le menteur</string>
+
+    <!-- Result -->
+    <string name="result_correct">BON VERDICT !</string>
+    <string name="result_wrong">MAUVAIS VERDICT</string>
+    <string name="result_points_gained">+%1$d points de réputation</string>
+    <string name="result_points_lost">%1$d points de réputation</string>
+    <string name="result_explanation">Le coupable était : %1$s</string>
+    <string name="result_next">AFFAIRE SUIVANTE</string>
+
+    <!-- Reputation -->
+    <string name="reputation_title">Réputation</string>
+    <string name="reputation_rank">Rang : %1$s</string>
+    <string name="reputation_cases_played">Affaires traitées : %1$d</string>
+    <string name="reputation_success_rate">Taux de réussite : %1$d%%</string>
+    <string name="reputation_correct">Bons verdicts : %1$d</string>
+    <string name="reputation_wrong">Mauvais verdicts : %1$d</string>
+
+    <!-- Ranks -->
+    <string name="rank_debutant">Débutant</string>
+    <string name="rank_juge">Juge</string>
+    <string name="rank_bon_juge">Bon Juge</string>
+    <string name="rank_expert">Expert</string>
+    <string name="rank_legende">Légende</string>
+
+    <!-- Game Over -->
+    <string name="gameover_title">RENVOYÉ !</string>
+    <string name="gameover_message">Votre réputation est tombée à zéro.\nVous avez été renvoyé du tribunal.</string>
+    <string name="gameover_restart">RECOMMENCER</string>
+
+    <!-- Victory -->
+    <string name="victory_title">JUGE LÉGENDAIRE !</string>
+    <string name="victory_message">Vous avez résolu toutes les affaires.\nVotre sagesse est inégalée.</string>
+    <string name="victory_infinite">MODE INFINI</string>
+    <string name="victory_menu">MENU PRINCIPAL</string>
+
+    <!-- Timer -->
+    <string name="timer_remaining">Temps restant</string>
+    <string name="timer_expired">Temps écoulé !</string>
+
+    <!-- Themes -->
+    <string name="theme_ecole">École</string>
+    <string name="theme_travail">Travail</string>
+    <string name="theme_famille">Famille</string>
+    <string name="theme_police">Police</string>
+    <string name="theme_tribunal">Tribunal</string>
+    <string name="theme_enquete">Enquête</string>
+    <string name="theme_espionnage">Espionnage</string>
+    <string name="theme_elite">Élite</string>
+    <string name="theme_locked">🔒 Thème verrouillé</string>
+    <string name="theme_unlock_condition">Terminer %1$d affaires + %2$d réputation</string>
+
+    <!-- Misc -->
     <string name="ad_loading">Chargement…</string>
-    <string name="analyses_exhausted">Analyses épuisées</string>
-    <string name="analyses_exhausted_desc">Tu as utilisé tes 5 analyses gratuites aujourd\'hui.</string>
+    <string name="back">Retour</string>
+    <string name="replay_mode">Mode entraînement (sans effet sur la réputation)</string>
+
+    <!-- Promoted / Demoted -->
+    <string name="promoted">Promu : %1$s !</string>
+    <string name="demoted">Rétrogradé : %1$s</string>
 </resources>
