@@ -1,13 +1,24 @@
 package com.theverdict.app.ui.components
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.domain.model.AvatarConfig
@@ -33,71 +44,241 @@ fun SuspectAvatar(
     val skinColor = skinTones.getOrElse(config.skinTone) { skinTones[0] }
     val hairColor = hairColors.getOrElse(config.hairColor) { hairColors[0] }
 
+    val hasClues = clues.isNotEmpty()
+    val inf = rememberInfiniteTransition(label = "avatar")
+
+    // Animated eye shift (for shifty eyes clue)
+    val hasShiftyEyes = clues.any { it == Clue.REGARDE_AILLEURS || it == Clue.EVITE_REGARD }
+    val eyeShift by inf.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "eyeShift"
+    )
+
+    // Animated sweat drop falling
+    val hasSweat = Clue.TRANSPIRE in clues || Clue.MAINS_TREMBLENT in clues
+    val sweatDrop by inf.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "sweatDrop"
+    )
+
+    // Trembling (for nervous/trembling hands)
+    val isNervous = clues.any { it == Clue.NERVEUX || it == Clue.MAINS_TREMBLENT }
+    val tremble by inf.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(100, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "tremble"
+    )
+
+    // Mouth animation (for talking fast / hesitating)
+    val isTalking = clues.any { it == Clue.PARLE_VITE || it == Clue.HESITE || it == Clue.VOIX_CHANGE }
+    val mouthAnim by inf.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(if (Clue.PARLE_VITE in clues) 300 else 800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "mouthAnim"
+    )
+
+    // Brow raise for nervous
+    val browAnim by inf.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "browAnim"
+    )
+
     Canvas(modifier = modifier.size(size)) {
         val w = this.size.width
         val h = this.size.height
         val centerX = w / 2f
         val headRadius = w * 0.3f
         val headCenterY = h * 0.35f
+        val trembleOffset = if (isNervous) tremble * w * 0.005f else 0f
+
+        // Dark circular background behind suspect
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF2A2A2A), Color(0xFF1A1A1A), Color.Transparent),
+                center = Offset(centerX, h * 0.45f),
+                radius = w * 0.48f
+            ),
+            radius = w * 0.48f,
+            center = Offset(centerX, h * 0.45f)
+        )
 
         // Neck
         drawRect(
             color = skinColor,
-            topLeft = Offset(centerX - w * 0.08f, headCenterY + headRadius * 0.7f),
+            topLeft = Offset(centerX - w * 0.08f + trembleOffset, headCenterY + headRadius * 0.7f),
             size = Size(w * 0.16f, h * 0.15f)
         )
 
         // Body (shoulders)
         drawOval(
             color = Color(0xFF444444),
-            topLeft = Offset(centerX - w * 0.35f, h * 0.65f),
+            topLeft = Offset(centerX - w * 0.35f + trembleOffset, h * 0.65f),
             size = Size(w * 0.7f, h * 0.4f)
         )
 
-        // Head
-        drawCircle(color = skinColor, radius = headRadius, center = Offset(centerX, headCenterY))
+        // Arms crossed visual cue
+        if (Clue.BRAS_CROISES in clues) {
+            drawLine(
+                Color(0xFF555555),
+                Offset(centerX - w * 0.3f, h * 0.78f),
+                Offset(centerX + w * 0.3f, h * 0.72f),
+                strokeWidth = w * 0.04f
+            )
+            drawLine(
+                Color(0xFF555555),
+                Offset(centerX + w * 0.3f, h * 0.78f),
+                Offset(centerX - w * 0.3f, h * 0.72f),
+                strokeWidth = w * 0.04f
+            )
+        }
+
+        // Shadow under head
+        drawOval(
+            brush = Brush.radialGradient(
+                colors = listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent),
+                center = Offset(centerX + trembleOffset, headCenterY + headRadius * 0.95f)
+            ),
+            topLeft = Offset(centerX - headRadius * 0.7f + trembleOffset, headCenterY + headRadius * 0.7f),
+            size = Size(headRadius * 1.4f, headRadius * 0.5f)
+        )
+
+        // Head with gradient
+        drawCircle(color = skinColor, radius = headRadius, center = Offset(centerX + trembleOffset, headCenterY))
+        // Face gradient overlay (subtle light from top)
+        drawCircle(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color.White.copy(alpha = 0.10f), Color.Transparent, Color.Black.copy(alpha = 0.10f)),
+                startY = headCenterY - headRadius,
+                endY = headCenterY + headRadius
+            ),
+            radius = headRadius,
+            center = Offset(centerX + trembleOffset, headCenterY)
+        )
+        // Thinner head outline
+        drawCircle(
+            color = skinColor.copy(alpha = 0.5f).compositeOver(Color(0xFF333333)),
+            radius = headRadius,
+            center = Offset(centerX + trembleOffset, headCenterY),
+            style = Stroke(width = headRadius * 0.025f)
+        )
 
         // Hair
-        drawHair(config.hairStyle, hairColor, centerX, headCenterY, headRadius)
+        drawHair(config.hairStyle, hairColor, centerX + trembleOffset, headCenterY, headRadius)
 
-        // Eyes
+        // Eyes with animation
         val eyeY = headCenterY - headRadius * 0.05f
         val eyeSpacing = headRadius * 0.45f
-        val hasShiftyEyes = clues.any { it == Clue.REGARDE_AILLEURS || it == Clue.EVITE_REGARD }
-        val eyeOffsetX = if (hasShiftyEyes) headRadius * 0.08f else 0f
+        val eyeOffsetX = if (hasShiftyEyes) eyeShift * headRadius * 0.1f else 0f
 
-        drawCircle(Color.White, headRadius * 0.18f, Offset(centerX - eyeSpacing, eyeY))
-        drawCircle(Color.White, headRadius * 0.18f, Offset(centerX + eyeSpacing, eyeY))
-        drawCircle(Color(0xFF2C1B0E), headRadius * 0.1f, Offset(centerX - eyeSpacing + eyeOffsetX, eyeY))
-        drawCircle(Color(0xFF2C1B0E), headRadius * 0.1f, Offset(centerX + eyeSpacing + eyeOffsetX, eyeY))
+        // Eye whites
+        drawCircle(Color.White, headRadius * 0.18f, Offset(centerX - eyeSpacing + trembleOffset, eyeY))
+        drawCircle(Color.White, headRadius * 0.18f, Offset(centerX + eyeSpacing + trembleOffset, eyeY))
+        // Pupils (animated)
+        drawCircle(Color(0xFF2C1B0E), headRadius * 0.1f, Offset(centerX - eyeSpacing + eyeOffsetX + trembleOffset, eyeY))
+        drawCircle(Color(0xFF2C1B0E), headRadius * 0.1f, Offset(centerX + eyeSpacing + eyeOffsetX + trembleOffset, eyeY))
 
-        // Eyebrows
-        val isNervous = clues.any { it == Clue.NERVEUX || it == Clue.TRANSPIRE }
+        // Eyebrows (animated for nervous)
         val browY = eyeY - headRadius * 0.22f
-        val browTilt = if (isNervous) headRadius * 0.06f else 0f
-        drawLine(Color(0xFF2C1B0E), Offset(centerX - eyeSpacing - headRadius * 0.12f, browY + browTilt), Offset(centerX - eyeSpacing + headRadius * 0.12f, browY), strokeWidth = headRadius * 0.06f)
-        drawLine(Color(0xFF2C1B0E), Offset(centerX + eyeSpacing - headRadius * 0.12f, browY), Offset(centerX + eyeSpacing + headRadius * 0.12f, browY + browTilt), strokeWidth = headRadius * 0.06f)
+        val browTilt = if (isNervous) browAnim * headRadius * 0.08f else 0f
+        drawLine(
+            Color(0xFF2C1B0E),
+            Offset(centerX - eyeSpacing - headRadius * 0.12f + trembleOffset, browY + browTilt),
+            Offset(centerX - eyeSpacing + headRadius * 0.12f + trembleOffset, browY),
+            strokeWidth = headRadius * 0.06f
+        )
+        drawLine(
+            Color(0xFF2C1B0E),
+            Offset(centerX + eyeSpacing - headRadius * 0.12f + trembleOffset, browY),
+            Offset(centerX + eyeSpacing + headRadius * 0.12f + trembleOffset, browY + browTilt),
+            strokeWidth = headRadius * 0.06f
+        )
 
-        // Mouth
+        // Mouth (animated)
         val mouthY = headCenterY + headRadius * 0.35f
         val isConfident = Clue.CONFIANT in clues
         val isSmilingTooMuch = Clue.SOURIT_TROP in clues
         if (isConfident || isSmilingTooMuch) {
-            drawArc(Color(0xFF2C1B0E), 0f, 180f, false, Offset(centerX - headRadius * 0.2f, mouthY - headRadius * 0.08f), Size(headRadius * 0.4f, headRadius * 0.2f))
+            val smileWidth = headRadius * (0.2f + if (isSmilingTooMuch) mouthAnim * 0.08f else 0f)
+            drawArc(
+                Color(0xFF2C1B0E), 0f, 180f, false,
+                Offset(centerX - smileWidth + trembleOffset, mouthY - headRadius * 0.08f),
+                Size(smileWidth * 2f, headRadius * 0.2f)
+            )
+        } else if (isTalking) {
+            val openAmount = mouthAnim * headRadius * 0.12f
+            drawOval(
+                Color(0xFF2C1B0E),
+                Offset(centerX - headRadius * 0.1f + trembleOffset, mouthY - openAmount / 2),
+                Size(headRadius * 0.2f, openAmount.coerceAtLeast(headRadius * 0.04f))
+            )
         } else if (isNervous) {
-            drawLine(Color(0xFF2C1B0E), Offset(centerX - headRadius * 0.12f, mouthY), Offset(centerX + headRadius * 0.12f, mouthY + headRadius * 0.04f), strokeWidth = headRadius * 0.04f)
+            // Wobbly worried line
+            drawLine(
+                Color(0xFF2C1B0E),
+                Offset(centerX - headRadius * 0.12f + trembleOffset, mouthY + tremble * headRadius * 0.02f),
+                Offset(centerX + headRadius * 0.12f + trembleOffset, mouthY - tremble * headRadius * 0.02f),
+                strokeWidth = headRadius * 0.04f
+            )
         } else {
-            drawLine(Color(0xFF2C1B0E), Offset(centerX - headRadius * 0.15f, mouthY), Offset(centerX + headRadius * 0.15f, mouthY), strokeWidth = headRadius * 0.04f)
+            drawLine(
+                Color(0xFF2C1B0E),
+                Offset(centerX - headRadius * 0.15f + trembleOffset, mouthY),
+                Offset(centerX + headRadius * 0.15f + trembleOffset, mouthY),
+                strokeWidth = headRadius * 0.04f
+            )
         }
 
-        // Sweat drop
-        if (Clue.TRANSPIRE in clues || Clue.MAINS_TREMBLENT in clues) {
-            drawCircle(Color(0xFF42A5F5), headRadius * 0.07f, Offset(centerX + headRadius * 0.85f, headCenterY - headRadius * 0.1f))
-            drawCircle(Color(0xFF42A5F5), headRadius * 0.05f, Offset(centerX + headRadius * 0.95f, headCenterY + headRadius * 0.1f))
+        // Animated sweat drops
+        if (hasSweat) {
+            val sweatY1 = headCenterY - headRadius * 0.3f + sweatDrop * headRadius * 1.2f
+            val sweatAlpha = (1f - sweatDrop).coerceIn(0f, 1f)
+            val sweatColor = Color(0xFF42A5F5).copy(alpha = sweatAlpha)
+
+            // Main drop (teardrop shape)
+            drawCircle(sweatColor, headRadius * 0.06f, Offset(centerX + headRadius * 0.85f, sweatY1))
+            // Trail
+            drawCircle(
+                sweatColor.copy(alpha = sweatAlpha * 0.5f),
+                headRadius * 0.04f,
+                Offset(centerX + headRadius * 0.85f, sweatY1 - headRadius * 0.12f)
+            )
+
+            // Second drop (delayed by using offset calculation)
+            val sweatDrop2 = (sweatDrop + 0.4f) % 1f
+            val sweatY2 = headCenterY - headRadius * 0.1f + sweatDrop2 * headRadius * 1.0f
+            val sweatAlpha2 = (1f - sweatDrop2).coerceIn(0f, 1f)
+            drawCircle(
+                Color(0xFF42A5F5).copy(alpha = sweatAlpha2),
+                headRadius * 0.05f,
+                Offset(centerX + headRadius * 0.95f, sweatY2)
+            )
         }
 
         // Accessory
-        drawAccessory(config.accessory, centerX, headCenterY, headRadius)
+        drawAccessory(config.accessory, centerX + trembleOffset, headCenterY, headRadius)
     }
 }
 

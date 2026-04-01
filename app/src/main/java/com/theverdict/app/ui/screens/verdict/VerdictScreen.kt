@@ -1,9 +1,14 @@
 package com.theverdict.app.ui.screens.verdict
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +41,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.theverdict.app.data.repository.CaseRepository
 import com.theverdict.app.data.repository.PlayerRepository
 import com.theverdict.app.domain.model.CaseTheme
@@ -47,6 +61,7 @@ import com.theverdict.app.domain.model.Suspect
 import com.theverdict.app.ui.components.SuspectAvatar
 import com.theverdict.app.ui.components.TimerBar
 import com.theverdict.app.ui.theme.*
+import com.theverdict.app.ui.util.LocalHapticManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -64,7 +79,8 @@ fun VerdictScreen(
     val profile by playerRepository.profile.collectAsState(initial = PlayerProfile())
     val scope = rememberCoroutineScope()
     val selectedIds = remember { mutableStateListOf<Int>() }
-    var nobodySelected by remember { mutableIntStateOf(0) } // 0=not selected, 1=nobody, 2=everyone
+    var nobodySelected by remember { mutableIntStateOf(0) }
+    val haptic = LocalHapticManager.current
 
     // Timer
     var remainingSeconds by remember { mutableIntStateOf(90) }
@@ -89,19 +105,27 @@ fun VerdictScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                )
+            )
     ) {
         TopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Gavel, contentDescription = null, tint = GoldPrimary)
                     Spacer(Modifier.width(8.dp))
-                    Text("Votre Verdict")
+                    Text(
+                        "Votre Verdict",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = GoldLight
+                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = DarkBackground,
-                titleContentColor = TextWhite
+                containerColor = Color.Transparent,
+                titleContentColor = GoldLight
             )
         )
 
@@ -119,7 +143,10 @@ fun VerdictScreen(
 
                 Text(
                     text = "Qui ment ?",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = Shadow(color = GoldPrimary.copy(alpha = 0.3f), offset = Offset(0f, 2f), blurRadius = 8f)
+                    ),
                     color = TextWhite
                 )
                 Spacer(Modifier.height(4.dp))
@@ -141,6 +168,7 @@ fun VerdictScreen(
                             suspect = suspect,
                             isSelected = isSelected,
                             onClick = {
+                                haptic.lightTap()
                                 nobodySelected = 0
                                 if (theme.hasSpecialVerdicts) {
                                     if (isSelected) selectedIds.remove(suspect.id)
@@ -182,31 +210,59 @@ fun VerdictScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Confirm button
+                // Confirm button — gold gradient when enabled
                 val hasSelection = selectedIds.isNotEmpty() || nobodySelected == 1
-                Button(
-                    onClick = {
-                        scope.launch {
-                            val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
-                            val result = playerRepository.applyVerdict(profile, case, liarIds)
-                            onResult(result.isCorrect, result.pointsChange)
+                if (hasSelection) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawBehind {
+                                drawRoundRect(
+                                    brush = Brush.verticalGradient(listOf(Color(0x40D4A24C), Color.Transparent)),
+                                    cornerRadius = CornerRadius(24.dp.toPx()),
+                                    topLeft = Offset(0f, 4.dp.toPx()),
+                                    size = Size(size.width, size.height + 4.dp.toPx())
+                                )
+                            }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight)))
+                                .clickable {
+                                    haptic.medium()
+                                    scope.launch {
+                                        val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
+                                        val result = playerRepository.applyVerdict(profile, case, liarIds)
+                                        onResult(result.isCorrect, result.pointsChange)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "CONFIRMER LE VERDICT",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp),
+                                color = DarkBackground
+                            )
                         }
-                    },
-                    enabled = hasSelection,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = GoldPrimary,
-                        disabledContainerColor = DarkSurfaceVariant
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        "CONFIRMER LE VERDICT",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = if (hasSelection) DarkBackground else TextDimmed
-                    )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(DarkSurfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "CONFIRMER LE VERDICT",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = TextDimmed
+                        )
+                    }
                 }
             }
         }
@@ -219,16 +275,35 @@ private fun SuspectVerdictCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val bounceScale = remember { Animatable(1f) }
+    val bgColor by animateColorAsState(
+        targetValue = if (isSelected) VerdictWrong.copy(alpha = 0.1f) else DarkCard,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "bgColor"
+    )
+
+    LaunchedEffect(isSelected) {
+        if (isSelected) {
+            bounceScale.animateTo(1.04f, spring(stiffness = Spring.StiffnessHigh))
+            bounceScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+        }
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .graphicsLayer { scaleX = bounceScale.value; scaleY = bounceScale.value }
             .clickable(onClick = onClick)
             .then(
                 if (isSelected) Modifier.border(2.dp, VerdictWrong, RoundedCornerShape(16.dp))
-                else Modifier
+                else Modifier.border(
+                    1.dp,
+                    Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.2f), GoldPrimary.copy(alpha = 0.1f))),
+                    RoundedCornerShape(16.dp)
+                )
             ),
         shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) VerdictWrong.copy(alpha = 0.1f) else DarkCard
+        color = bgColor
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -238,7 +313,7 @@ private fun SuspectVerdictCard(
             Spacer(Modifier.width(12.dp))
             Text(
                 text = suspect.nom,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = if (isSelected) VerdictWrong else TextWhite,
                 modifier = Modifier.weight(1f)
             )
@@ -261,14 +336,18 @@ private fun SpecialOption(
             .clickable(onClick = onClick)
             .then(
                 if (isSelected) Modifier.border(2.dp, GoldPrimary, RoundedCornerShape(16.dp))
-                else Modifier
+                else Modifier.border(
+                    1.dp,
+                    Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.2f), GoldPrimary.copy(alpha = 0.1f))),
+                    RoundedCornerShape(16.dp)
+                )
             ),
         shape = RoundedCornerShape(16.dp),
         color = if (isSelected) GoldPrimary.copy(alpha = 0.1f) else DarkSurfaceVariant
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
             color = if (isSelected) GoldPrimary else TextGray,
             modifier = Modifier.padding(16.dp)
         )

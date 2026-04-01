@@ -4,17 +4,9 @@
 -keep class com.google.android.gms.ads.** { *; }
 -keep class com.google.android.gms.internal.ads.** { *; }
 
-# Keep Google Fonts provider
--keep class com.google.android.gms.fonts.** { *; }
--keep class androidx.compose.ui.text.google.** { *; }
-
 # Keep Compose
 -dontwarn androidx.compose.**
 -keep class androidx.compose.** { *; }
-
-# Keep ExoPlayer / Media3
--dontwarn androidx.media3.**
--keep class androidx.media3.** { *; }
 
 # Keep Navigation Compose
 -keep class androidx.navigation.** { *; }
@@ -26,5 +18,36 @@
 -dontwarn kotlinx.coroutines.**
 -keep class kotlinx.coroutines.** { *; }
 
-# Keep model classes (needed for any future serialization)
+# Keep Kotlin Serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keepclassmembers @kotlinx.serialization.Serializable class com.theverdict.app.** {
+    *** Companion;
+    *** INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+    static <1>$Companion Companion;
+}
+-if @kotlinx.serialization.Serializable class ** {
+    static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-if @kotlinx.serialization.Serializable class ** {
+    public static ** INSTANCE;
+}
+-keepclassmembers class <1> {
+    public static <1> INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Keep model classes
 -keep class com.theverdict.app.domain.model.** { *; }
+
+# Keep R classes
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}

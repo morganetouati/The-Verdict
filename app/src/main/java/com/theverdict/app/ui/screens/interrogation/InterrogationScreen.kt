@@ -1,6 +1,7 @@
 package com.theverdict.app.ui.screens.interrogation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.data.repository.CaseRepository
 import com.theverdict.app.domain.model.CaseTheme
@@ -41,22 +47,33 @@ fun InterrogationScreen(
     val theme = CaseTheme.entries[themeIndex]
     val case = caseRepository.getCase(theme, caseIndex)
     val suspect = case?.suspects?.find { it.id == suspectId }
+    val dim = LocalDimensions.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                )
+            )
     ) {
         TopAppBar(
-            title = { Text("Interrogatoire") },
+            title = {
+                Text(
+                    "Interrogatoire",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = GoldLight
+                )
+            },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour", tint = TextWhite)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour", tint = GoldPrimary)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = DarkBackground,
-                titleContentColor = TextWhite
+                containerColor = Color.Transparent,
+                titleContentColor = GoldLight
             )
         )
 
@@ -68,10 +85,17 @@ fun InterrogationScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Name
+                // Name with shadow
                 Text(
                     text = suspect.nom,
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = Shadow(
+                            color = GoldPrimary.copy(alpha = 0.3f),
+                            offset = Offset(0f, 2f),
+                            blurRadius = 8f
+                        )
+                    ),
                     color = TextWhite
                 )
 
@@ -80,7 +104,7 @@ fun InterrogationScreen(
                 Text(
                     text = "Cliquez sur les zones pour chercher des indices",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextDimmed
+                    color = GoldLight.copy(alpha = 0.6f)
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -89,22 +113,28 @@ fun InterrogationScreen(
                 InteractiveAvatar(
                     config = suspect.avatar,
                     suspectClues = suspect.indices,
-                    size = 300.dp,
+                    size = dim.avatarSize,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(24.dp))
 
-                // Statement
+                // Statement with gold border
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 1.dp,
+                            brush = Brush.verticalGradient(listOf(GoldDark.copy(alpha = 0.5f), GoldPrimary.copy(alpha = 0.2f))),
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     shape = RoundedCornerShape(16.dp),
                     color = DarkCard
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             text = "Déclaration",
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                             color = GoldPrimary
                         )
                         Spacer(Modifier.height(8.dp))

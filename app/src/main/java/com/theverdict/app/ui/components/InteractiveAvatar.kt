@@ -88,10 +88,10 @@ fun InteractiveAvatar(
             modifier = Modifier.size(size),
             contentAlignment = Alignment.Center
         ) {
-            // Background avatar (no clue visuals — player must discover them)
+            // Background avatar — shows animated clues once discovered
             SuspectAvatar(
                 config = config,
-                clues = emptyList(), // Hide visual clue hints until discovered
+                clues = discoveredClues.keys.toList(),
                 size = size
             )
 

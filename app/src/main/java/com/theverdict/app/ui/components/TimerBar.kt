@@ -17,6 +17,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.ui.theme.*
 
@@ -38,6 +42,12 @@ fun TimerBar(
         else -> TimerNormal
     }
 
+    val colorLight = when {
+        remainingSeconds <= 15 -> Color(0xFFEF5350)
+        remainingSeconds <= 30 -> Color(0xFFFFB74D)
+        else -> Color(0xFF64B5F6)
+    }
+
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -45,13 +55,13 @@ fun TimerBar(
         ) {
             Text(
                 text = "⏱ Temps restant",
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = TextGray
             )
             Spacer(Modifier.weight(1f))
             Text(
                 text = "${remainingSeconds}s",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = color
             )
         }
@@ -59,16 +69,24 @@ fun TimerBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp))
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .drawBehind {
+                    // Subtle glow behind the bar
+                    drawRoundRect(
+                        color = color.copy(alpha = 0.15f),
+                        size = size.copy(height = size.height + 4.dp.toPx()),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx())
+                    )
+                }
                 .background(DarkSurfaceVariant)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction)
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(color)
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Brush.horizontalGradient(listOf(color, colorLight, color)))
             )
         }
     }

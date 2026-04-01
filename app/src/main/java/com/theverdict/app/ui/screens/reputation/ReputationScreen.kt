@@ -1,6 +1,9 @@
 package com.theverdict.app.ui.screens.reputation
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,10 +26,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.data.repository.PlayerRepository
@@ -34,6 +45,8 @@ import com.theverdict.app.domain.model.PlayerProfile
 import com.theverdict.app.ui.components.RankBadge
 import com.theverdict.app.ui.components.ReputationBar
 import com.theverdict.app.ui.theme.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,20 +59,31 @@ fun ReputationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Réputation", color = GoldPrimary) },
+                title = {
+                    Text(
+                        "Réputation",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = GoldLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour", tint = TextWhite)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour", tint = GoldPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = DarkBackground
+        containerColor = Color.Transparent
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    )
+                )
                 .padding(padding)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -72,7 +96,10 @@ fun ReputationScreen(
 
             Text(
                 text = "${profile.reputation}/100",
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    shadow = Shadow(color = GoldPrimary.copy(alpha = 0.4f), offset = Offset(0f, 2f), blurRadius = 8f)
+                ),
                 color = GoldPrimary
             )
 
@@ -86,25 +113,61 @@ fun ReputationScreen(
 
             Spacer(Modifier.height(40.dp))
 
-            // Stats cards
+            // Stats cards with gold border
+            val statsAlpha = remember { List(5) { Animatable(0f) } }
+            val statsOffsetY = remember { List(5) { Animatable(20f) } }
+
+            LaunchedEffect(Unit) {
+                statsAlpha.forEachIndexed { index, anim ->
+                    launch {
+                        delay(index * 80L)
+                        anim.animateTo(1f, tween(400))
+                    }
+                }
+                statsOffsetY.forEachIndexed { index, anim ->
+                    launch {
+                        delay(index * 80L)
+                        anim.animateTo(0f, tween(400))
+                    }
+                }
+            }
+
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(listOf(GoldDark.copy(alpha = 0.4f), GoldPrimary.copy(alpha = 0.2f))),
+                        shape = RoundedCornerShape(16.dp)
+                    ),
                 colors = CardDefaults.cardColors(containerColor = DarkCard),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
                         text = "Statistiques",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = GoldPrimary
                     )
                     Spacer(Modifier.height(16.dp))
 
-                    StatRow("Affaires traitées", "${profile.casesPlayed}")
-                    StatRow("Verdicts corrects", "${profile.correctVerdicts}")
-                    StatRow("Verdicts erronés", "${profile.wrongVerdicts}")
-                    StatRow("Taux de réussite", "${profile.successRate}%")
-                    StatRow("Progression", "${profile.completedCaseIds.size}/80")
+                    val statLabels = listOf(
+                        "Affaires traitées" to "${profile.casesPlayed}",
+                        "Verdicts corrects" to "${profile.correctVerdicts}",
+                        "Verdicts erronés" to "${profile.wrongVerdicts}",
+                        "Taux de réussite" to "${profile.successRate}%",
+                        "Progression" to "${profile.completedCaseIds.size}/80"
+                    )
+                    statLabels.forEachIndexed { index, (label, value) ->
+                        StatRow(
+                            label = label,
+                            value = value,
+                            modifier = Modifier.graphicsLayer {
+                                alpha = statsAlpha[index].value
+                                translationY = statsOffsetY[index].value
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -112,14 +175,14 @@ fun ReputationScreen(
 }
 
 @Composable
-private fun StatRow(label: String, value: String) {
+private fun StatRow(label: String, value: String, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = TextGray)
-        Text(text = value, style = MaterialTheme.typography.titleMedium, color = TextWhite)
+        Text(text = label, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium), color = TextGray)
+        Text(text = value, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = GoldLight)
     }
 }

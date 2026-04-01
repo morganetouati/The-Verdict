@@ -39,3 +39,8 @@ val ClueChipText = Color(0xFFE0E0E0)
 val TimerNormal = Color(0xFF42A5F5)
 val TimerWarning = Color(0xFFFF9800)
 val TimerCritical = Color(0xFFE53935)
+
+// Accent / Modern additions
+val AccentBlue = Color(0xFF5C6BC0)
+val AccentPurple = Color(0xFF7E57C2)
+val CardBorder = Color(0xFF3A3A3A)

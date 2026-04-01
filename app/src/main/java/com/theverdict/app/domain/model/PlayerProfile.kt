@@ -1,6 +1,8 @@
 package com.theverdict.app.domain.model
 
 data class PlayerProfile(
+    val pseudo: String = "",
+    val costumeIndex: Int = 0,
     val reputation: Int = 0,
     val casesPlayed: Int = 0,
     val correctVerdicts: Int = 0,
@@ -17,4 +19,7 @@ data class PlayerProfile(
 
     val allCasesCompleted: Boolean
         get() = completedCaseIds.size >= 80
+
+    val displayName: String
+        get() = pseudo.ifBlank { "Juge Anonyme" }
 }

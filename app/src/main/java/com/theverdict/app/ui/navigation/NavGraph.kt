@@ -1,5 +1,18 @@
 package com.theverdict.app.ui.navigation
 
+import android.app.Activity
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -8,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.theverdict.app.data.local.AdManager
 import com.theverdict.app.data.local.CaseLoader
 import com.theverdict.app.data.local.PreferencesManager
 import com.theverdict.app.data.repository.CaseRepository
@@ -16,8 +30,11 @@ import com.theverdict.app.ui.screens.case.CasePresentationScreen
 import com.theverdict.app.ui.screens.gameover.GameOverScreen
 import com.theverdict.app.ui.screens.interrogation.InterrogationScreen
 import com.theverdict.app.ui.screens.menu.MainMenuScreen
+import com.theverdict.app.ui.screens.privacy.PrivacyPolicyScreen
+import com.theverdict.app.ui.screens.profile.PlayerProfileScreen
 import com.theverdict.app.ui.screens.reputation.ReputationScreen
 import com.theverdict.app.ui.screens.result.ResultScreen
+import com.theverdict.app.ui.screens.splash.SplashScreen
 import com.theverdict.app.ui.screens.suspects.SuspectsListScreen
 import com.theverdict.app.ui.screens.tutorial.TutorialScreen
 import com.theverdict.app.ui.screens.verdict.VerdictScreen
@@ -26,6 +43,41 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+
+// ─── Transition helpers ───
+private const val DURATION = 400
+private const val DURATION_FAST = 300
+private const val DURATION_SLOW = 600
+
+private fun slideInFromRight(): EnterTransition =
+    slideInHorizontally(tween(DURATION)) { it } + fadeIn(tween(DURATION))
+
+private fun slideOutToLeft(): ExitTransition =
+    slideOutHorizontally(tween(DURATION)) { -it / 3 } + fadeOut(tween(DURATION))
+
+private fun slideInFromLeft(): EnterTransition =
+    slideInHorizontally(tween(DURATION)) { -it } + fadeIn(tween(DURATION))
+
+private fun slideOutToRight(): ExitTransition =
+    slideOutHorizontally(tween(DURATION)) { it } + fadeOut(tween(DURATION))
+
+private fun slideInFromBottom(): EnterTransition =
+    slideInVertically(tween(DURATION)) { it / 2 } + fadeIn(tween(DURATION_FAST))
+
+private fun slideOutToBottom(): ExitTransition =
+    slideOutVertically(tween(DURATION)) { it / 2 } + fadeOut(tween(DURATION_FAST))
+
+private fun cinematicFadeIn(): EnterTransition =
+    fadeIn(tween(DURATION_SLOW)) + scaleIn(tween(DURATION_SLOW), initialScale = 0.92f)
+
+private fun cinematicFadeOut(): ExitTransition =
+    fadeOut(tween(DURATION_FAST)) + scaleOut(tween(DURATION_FAST), targetScale = 1.05f)
+
+private fun scaleZoomIn(): EnterTransition =
+    scaleIn(tween(DURATION), initialScale = 0.85f) + fadeIn(tween(DURATION))
+
+private fun scaleZoomOut(): ExitTransition =
+    scaleOut(tween(DURATION_FAST), targetScale = 0.85f) + fadeOut(tween(DURATION_FAST))
 
 @Composable
 fun NavGraph() {
@@ -36,17 +88,38 @@ fun NavGraph() {
     val caseRepository = remember { CaseRepository(caseLoader) }
     val preferencesManager = remember { PreferencesManager(context) }
     val playerRepository = remember { PlayerRepository(preferencesManager) }
+    val adManager = remember { AdManager(context) }
 
     val hasSeenTutorial = remember {
         runBlocking {
             preferencesManager.hasSeenTutorial.first()
         }
     }
-    val startDest = if (hasSeenTutorial) Screen.Menu.route else Screen.Tutorial.route
+    val startDest = Screen.Splash.route
+    val menuOrTutorial = if (hasSeenTutorial) Screen.Menu.route else Screen.Tutorial.route
 
     NavHost(navController = navController, startDestination = startDest) {
 
-        composable(Screen.Tutorial.route) {
+        // ─── Splash (animated intro) ───
+        composable(
+            Screen.Splash.route,
+            exitTransition = { cinematicFadeOut() }
+        ) {
+            SplashScreen(
+                onFinished = {
+                    navController.navigate(menuOrTutorial) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ─── Tutorial ───
+        composable(
+            Screen.Tutorial.route,
+            enterTransition = { cinematicFadeIn() },
+            exitTransition = { cinematicFadeOut() }
+        ) {
             TutorialScreen(
                 onFinish = {
                     MainScope().launch {
@@ -59,7 +132,14 @@ fun NavGraph() {
             )
         }
 
-        composable(Screen.Menu.route) {
+        // ─── Menu (fade from splash/tutorial, scale zoom on return) ───
+        composable(
+            Screen.Menu.route,
+            enterTransition = { cinematicFadeIn() },
+            exitTransition = { fadeOut(tween(DURATION_FAST)) },
+            popEnterTransition = { cinematicFadeIn() },
+            popExitTransition = { fadeOut(tween(DURATION_FAST)) }
+        ) {
             MainMenuScreen(
                 playerRepository = playerRepository,
                 caseRepository = caseRepository,
@@ -71,16 +151,27 @@ fun NavGraph() {
                 },
                 onTutorial = {
                     navController.navigate(Screen.Tutorial.route)
+                },
+                onProfile = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                onPrivacyPolicy = {
+                    navController.navigate(Screen.PrivacyPolicy.route)
                 }
             )
         }
 
+        // ─── Case Presentation (slide up from menu) ───
         composable(
             route = Screen.CasePresentation.route,
             arguments = listOf(
                 navArgument("themeIndex") { type = NavType.IntType },
                 navArgument("caseIndex") { type = NavType.IntType }
-            )
+            ),
+            enterTransition = { slideInFromBottom() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToBottom() }
         ) { backStackEntry ->
             val themeIndex = backStackEntry.arguments?.getInt("themeIndex") ?: 0
             val caseIndex = backStackEntry.arguments?.getInt("caseIndex") ?: 0
@@ -95,12 +186,17 @@ fun NavGraph() {
             )
         }
 
+        // ─── Suspects List (slide from right) ───
         composable(
             route = Screen.SuspectsList.route,
             arguments = listOf(
                 navArgument("themeIndex") { type = NavType.IntType },
                 navArgument("caseIndex") { type = NavType.IntType }
-            )
+            ),
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
         ) { backStackEntry ->
             val themeIndex = backStackEntry.arguments?.getInt("themeIndex") ?: 0
             val caseIndex = backStackEntry.arguments?.getInt("caseIndex") ?: 0
@@ -118,13 +214,18 @@ fun NavGraph() {
             )
         }
 
+        // ─── Interrogation (scale zoom into suspect) ───
         composable(
             route = Screen.Interrogation.route,
             arguments = listOf(
                 navArgument("themeIndex") { type = NavType.IntType },
                 navArgument("caseIndex") { type = NavType.IntType },
                 navArgument("suspectId") { type = NavType.IntType }
-            )
+            ),
+            enterTransition = { scaleZoomIn() },
+            exitTransition = { scaleZoomOut() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { scaleZoomOut() }
         ) { backStackEntry ->
             val themeIndex = backStackEntry.arguments?.getInt("themeIndex") ?: 0
             val caseIndex = backStackEntry.arguments?.getInt("caseIndex") ?: 0
@@ -138,12 +239,17 @@ fun NavGraph() {
             )
         }
 
+        // ─── Verdict (dramatic slide up) ───
         composable(
             route = Screen.Verdict.route,
             arguments = listOf(
                 navArgument("themeIndex") { type = NavType.IntType },
                 navArgument("caseIndex") { type = NavType.IntType }
-            )
+            ),
+            enterTransition = { slideInFromBottom() },
+            exitTransition = { cinematicFadeOut() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToBottom() }
         ) { backStackEntry ->
             val themeIndex = backStackEntry.arguments?.getInt("themeIndex") ?: 0
             val caseIndex = backStackEntry.arguments?.getInt("caseIndex") ?: 0
@@ -153,15 +259,27 @@ fun NavGraph() {
                 themeIndex = themeIndex,
                 caseIndex = caseIndex,
                 onResult = { isCorrect, pointsChange ->
-                    navController.navigate(
-                        Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange)
-                    ) {
-                        popUpTo(Screen.CasePresentation.createRoute(themeIndex, caseIndex)) { inclusive = true }
+                    val activity = context as? Activity
+                    if (activity != null) {
+                        adManager.onCaseCompleted(activity) {
+                            navController.navigate(
+                                Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange)
+                            ) {
+                                popUpTo(Screen.CasePresentation.createRoute(themeIndex, caseIndex)) { inclusive = true }
+                            }
+                        }
+                    } else {
+                        navController.navigate(
+                            Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange)
+                        ) {
+                            popUpTo(Screen.CasePresentation.createRoute(themeIndex, caseIndex)) { inclusive = true }
+                        }
                     }
                 }
             )
         }
 
+        // ─── Result (crossfade + scale from verdict) ───
         composable(
             route = Screen.Result.route,
             arguments = listOf(
@@ -169,7 +287,9 @@ fun NavGraph() {
                 navArgument("caseIndex") { type = NavType.IntType },
                 navArgument("isCorrect") { type = NavType.BoolType },
                 navArgument("pointsChange") { type = NavType.IntType }
-            )
+            ),
+            enterTransition = { scaleZoomIn() },
+            exitTransition = { slideOutToBottom() }
         ) { backStackEntry ->
             val themeIndex = backStackEntry.arguments?.getInt("themeIndex") ?: 0
             val caseIndex = backStackEntry.arguments?.getInt("caseIndex") ?: 0
@@ -205,14 +325,25 @@ fun NavGraph() {
             )
         }
 
-        composable(Screen.Reputation.route) {
+        // ─── Reputation (slide from right) ───
+        composable(
+            Screen.Reputation.route,
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToRight() },
+            popExitTransition = { slideOutToRight() }
+        ) {
             ReputationScreen(
                 playerRepository = playerRepository,
                 onBack = { navController.popBackStack() }
             )
         }
 
-        composable(Screen.GameOver.route) {
+        // ─── Game Over (cinematic slow fade) ───
+        composable(
+            Screen.GameOver.route,
+            enterTransition = { cinematicFadeIn() },
+            exitTransition = { cinematicFadeOut() }
+        ) {
             GameOverScreen(
                 playerRepository = playerRepository,
                 onRestart = {
@@ -223,7 +354,12 @@ fun NavGraph() {
             )
         }
 
-        composable(Screen.Victory.route) {
+        // ─── Victory (cinematic slow fade) ───
+        composable(
+            Screen.Victory.route,
+            enterTransition = { cinematicFadeIn() },
+            exitTransition = { cinematicFadeOut() }
+        ) {
             VictoryScreen(
                 playerRepository = playerRepository,
                 onMenu = {
@@ -236,6 +372,31 @@ fun NavGraph() {
                         popUpTo(Screen.Victory.route) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        // ─── Profile (slide from right) ───
+        composable(
+            Screen.Profile.route,
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToRight() },
+            popExitTransition = { slideOutToRight() }
+        ) {
+            PlayerProfileScreen(
+                playerRepository = playerRepository,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // ─── Privacy Policy (slide from right) ───
+        composable(
+            Screen.PrivacyPolicy.route,
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToRight() },
+            popExitTransition = { slideOutToRight() }
+        ) {
+            PrivacyPolicyScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

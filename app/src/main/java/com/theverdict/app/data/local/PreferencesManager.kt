@@ -19,6 +19,8 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class PreferencesManager(private val context: Context) {
 
     private object Keys {
+        val PSEUDO = stringPreferencesKey("pseudo")
+        val COSTUME_INDEX = intPreferencesKey("costume_index")
         val REPUTATION = intPreferencesKey("reputation")
         val CASES_PLAYED = intPreferencesKey("cases_played")
         val CORRECT_VERDICTS = intPreferencesKey("correct_verdicts")
@@ -32,6 +34,8 @@ class PreferencesManager(private val context: Context) {
 
     val playerProfile: Flow<PlayerProfile> = context.dataStore.data.map { prefs ->
         PlayerProfile(
+            pseudo = prefs[Keys.PSEUDO] ?: "",
+            costumeIndex = prefs[Keys.COSTUME_INDEX] ?: 0,
             reputation = prefs[Keys.REPUTATION] ?: 0,
             casesPlayed = prefs[Keys.CASES_PLAYED] ?: 0,
             correctVerdicts = prefs[Keys.CORRECT_VERDICTS] ?: 0,
@@ -45,6 +49,8 @@ class PreferencesManager(private val context: Context) {
 
     suspend fun updateProfile(profile: PlayerProfile) {
         context.dataStore.edit { prefs ->
+            prefs[Keys.PSEUDO] = profile.pseudo
+            prefs[Keys.COSTUME_INDEX] = profile.costumeIndex
             prefs[Keys.REPUTATION] = profile.reputation
             prefs[Keys.CASES_PLAYED] = profile.casesPlayed
             prefs[Keys.CORRECT_VERDICTS] = profile.correctVerdicts

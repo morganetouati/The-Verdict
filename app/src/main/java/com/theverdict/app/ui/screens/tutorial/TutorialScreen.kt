@@ -1,6 +1,8 @@
 package com.theverdict.app.ui.screens.tutorial
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,16 +18,19 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,7 +101,11 @@ fun TutorialScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                )
+            )
             .padding(24.dp)
     ) {
         Spacer(Modifier.height(48.dp))
@@ -113,16 +122,29 @@ fun TutorialScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = page.emoji,
-                    fontSize = 64.sp
-                )
+                // Emoji in medallion
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(GoldPrimary.copy(alpha = 0.08f))
+                        .border(1.dp, GoldDark.copy(alpha = 0.3f), CircleShape)
+                ) {
+                    Text(
+                        text = page.emoji,
+                        fontSize = 40.sp
+                    )
+                }
 
                 Spacer(Modifier.height(24.dp))
 
                 Text(
                     text = page.title,
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = Shadow(color = GoldPrimary.copy(alpha = 0.3f), offset = Offset(0f, 2f), blurRadius = 8f)
+                    ),
                     color = GoldPrimary,
                     textAlign = TextAlign.Center
                 )
@@ -147,14 +169,23 @@ fun TutorialScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             repeat(pages.size) { index ->
+                val isActive = index == pagerState.currentPage
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
-                        .size(if (index == pagerState.currentPage) 10.dp else 8.dp)
+                        .size(if (isActive) 10.dp else 8.dp)
+                        .then(
+                            if (isActive) Modifier.drawBehind {
+                                drawCircle(
+                                    color = GoldPrimary.copy(alpha = 0.3f),
+                                    radius = size.minDimension * 0.9f
+                                )
+                            } else Modifier
+                        )
                         .clip(CircleShape)
                         .background(
-                            if (index == pagerState.currentPage) GoldPrimary
-                            else TextDimmed
+                            if (isActive) GoldPrimary
+                            else DarkSurfaceVariant
                         )
                 )
             }
@@ -168,14 +199,19 @@ fun TutorialScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             if (pagerState.currentPage > 0) {
-                OutlinedButton(
-                    onClick = {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, GoldDark.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .background(Color.Transparent)
+                        .clickable {
+                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("PRÉCÉDENT", color = TextWhite)
+                    Text("PRÉCÉDENT", color = GoldLight, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
                 Spacer(Modifier.width(12.dp))
             } else {
@@ -184,26 +220,30 @@ fun TutorialScreen(
             }
 
             if (pagerState.currentPage < pages.size - 1) {
-                Button(
-                    onClick = {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight)))
+                        .clickable {
+                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("SUIVANT", color = DarkBackground)
+                    Text("SUIVANT", color = DarkBackground, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                 }
             } else {
-                Button(
-                    onClick = onFinish,
-                    colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
-                    shape = RoundedCornerShape(12.dp),
+                Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight)))
+                        .clickable { onFinish() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("COMMENCER 🎯", color = DarkBackground, style = MaterialTheme.typography.titleMedium)
+                    Text("COMMENCER 🎯", color = DarkBackground, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                 }
             }
         }

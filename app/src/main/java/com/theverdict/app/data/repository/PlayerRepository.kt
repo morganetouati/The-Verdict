@@ -116,4 +116,8 @@ class PlayerRepository(private val prefs: PreferencesManager) {
     suspend fun resetAll() {
         prefs.resetProfile()
     }
+
+    suspend fun updateProfileDirect(profile: PlayerProfile) {
+        prefs.updateProfile(profile)
+    }
 }

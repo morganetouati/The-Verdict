@@ -1,6 +1,7 @@
 package com.theverdict.app.ui.navigation
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
     data object Menu : Screen("menu")
     data object CasePresentation : Screen("case/{themeIndex}/{caseIndex}") {
         fun createRoute(themeIndex: Int, caseIndex: Int) = "case/$themeIndex/$caseIndex"
@@ -22,4 +23,6 @@ sealed class Screen(val route: String) {
     data object GameOver : Screen("gameover")
     data object Victory : Screen("victory")
     data object Tutorial : Screen("tutorial")
+    data object Profile : Screen("profile")
+    data object PrivacyPolicy : Screen("privacy_policy")
 }

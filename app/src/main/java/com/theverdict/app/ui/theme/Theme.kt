@@ -3,6 +3,7 @@ package com.theverdict.app.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 
 private val DarkColorScheme = darkColorScheme(
     primary = GoldPrimary,
@@ -23,9 +24,12 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun TheVerdictTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = Typography,
-        content = content
-    )
+    val dimensions = rememberDimensions()
+    CompositionLocalProvider(LocalDimensions provides dimensions) {
+        MaterialTheme(
+            colorScheme = DarkColorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
