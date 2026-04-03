@@ -2,9 +2,11 @@ package com.theverdict.app.ui.screens.reputation
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,9 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -94,19 +100,72 @@ fun ReputationScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            Text(
-                text = "${profile.reputation}/100",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    shadow = Shadow(color = GoldPrimary.copy(alpha = 0.4f), offset = Offset(0f, 2f), blurRadius = 8f)
-                ),
-                color = GoldPrimary
-            )
+            // Animated success rate circle
+            val rateTarget = profile.successRate.toFloat()
+            val animatedRate = remember { Animatable(0f) }
+            LaunchedEffect(rateTarget) {
+                animatedRate.animateTo(rateTarget, tween(1200))
+            }
 
-            Spacer(Modifier.height(12.dp))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(120.dp)
+            ) {
+                Canvas(modifier = Modifier.size(120.dp)) {
+                    val strokeW = 8.dp.toPx()
+                    val arcSize = Size(size.width - strokeW, size.height - strokeW)
+                    val arcOffset = Offset(strokeW / 2, strokeW / 2)
+                    // Background ring
+                    drawArc(
+                        color = DarkSurfaceVariant,
+                        startAngle = -90f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        topLeft = arcOffset,
+                        size = arcSize,
+                        style = Stroke(strokeW, cap = StrokeCap.Round)
+                    )
+                    // Animated progress ring
+                    if (animatedRate.value > 0f) {
+                        drawArc(
+                            brush = Brush.sweepGradient(listOf(GoldDark, GoldPrimary, GoldLight)),
+                            startAngle = -90f,
+                            sweepAngle = 360f * animatedRate.value / 100f,
+                            useCenter = false,
+                            topLeft = arcOffset,
+                            size = arcSize,
+                            style = Stroke(strokeW, cap = StrokeCap.Round)
+                        )
+                    }
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "${animatedRate.value.toInt()}%",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            shadow = Shadow(color = GoldPrimary.copy(alpha = 0.4f), offset = Offset(0f, 2f), blurRadius = 8f)
+                        ),
+                        color = GoldPrimary
+                    )
+                    Text(
+                        text = "Réussite",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextGray
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Animated reputation bar
+            val repTarget = profile.reputation.toFloat()
+            val animatedRep = remember { Animatable(0f) }
+            LaunchedEffect(repTarget) {
+                animatedRep.animateTo(repTarget, tween(1000))
+            }
 
             ReputationBar(
-                reputation = profile.reputation,
+                reputation = animatedRep.value.toInt(),
                 rank = profile.rank,
                 modifier = Modifier.fillMaxWidth()
             )

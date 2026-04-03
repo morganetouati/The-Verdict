@@ -1,10 +1,13 @@
 package com.theverdict.app.ui.screens.suspects
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,9 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +38,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +58,7 @@ import com.theverdict.app.domain.model.CaseTheme
 import com.theverdict.app.domain.model.Suspect
 import com.theverdict.app.ui.components.SuspectAvatar
 import com.theverdict.app.ui.theme.*
+import com.theverdict.app.ui.util.LocalHapticManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -67,6 +74,8 @@ fun SuspectsListScreen(
 ) {
     val theme = CaseTheme.entries[themeIndex]
     val case = caseRepository.getCase(theme, caseIndex)
+    val haptic = LocalHapticManager.current
+    val interrogatedIds = remember { mutableStateListOf<Int>() }
 
     Column(
         modifier = Modifier
@@ -113,7 +122,12 @@ fun SuspectsListScreen(
                     }
                     SuspectCard(
                         suspect = suspect,
-                        onClick = { onInterrogate(suspect.id) },
+                        isInterrogated = suspect.id in interrogatedIds,
+                        onClick = {
+                            haptic.lightTap()
+                            if (suspect.id !in interrogatedIds) interrogatedIds.add(suspect.id)
+                            onInterrogate(suspect.id)
+                        },
                         modifier = Modifier.graphicsLayer {
                             alpha = itemAlpha.value
                             translationX = itemOffsetX.value
@@ -163,12 +177,22 @@ fun SuspectsListScreen(
 @Composable
 private fun SuspectCard(
     suspect: Suspect,
+    isInterrogated: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .drawBehind {
+                // Shadow under card
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = 0.35f),
+                    cornerRadius = CornerRadius(16.dp.toPx()),
+                    topLeft = Offset(2.dp.toPx(), 4.dp.toPx()),
+                    size = Size(size.width - 2.dp.toPx(), size.height)
+                )
+            }
             .border(
                 width = 1.dp,
                 brush = Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.3f), GoldPrimary.copy(alpha = 0.15f))),
@@ -182,11 +206,31 @@ private fun SuspectCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SuspectAvatar(
-                config = suspect.avatar,
-                clues = suspect.indices,
-                size = 64.dp
-            )
+            // Avatar with optional interrogated badge
+            Box {
+                SuspectAvatar(
+                    config = suspect.avatar,
+                    clues = suspect.indices,
+                    size = 80.dp
+                )
+                if (isInterrogated) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(22.dp)
+                            .clip(CircleShape)
+                            .background(VerdictCorrect),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "Interrogé",
+                            tint = Color.White,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -196,9 +240,9 @@ private fun SuspectCard(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Appuyer pour interroger",
+                    text = if (isInterrogated) "Déjà interrogé" else "Appuyer pour interroger",
                     style = MaterialTheme.typography.bodySmall,
-                    color = GoldLight.copy(alpha = 0.6f)
+                    color = if (isInterrogated) VerdictCorrect.copy(alpha = 0.7f) else GoldLight.copy(alpha = 0.6f)
                 )
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GoldPrimary.copy(alpha = 0.5f))

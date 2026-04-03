@@ -434,8 +434,18 @@ private fun MenuButton(
     modifier: Modifier = Modifier,
     dimmed: Boolean = false
 ) {
+    val haptic = LocalHapticManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.93f else 1f,
+        animationSpec = tween(100),
+        label = "menuBtnScale"
+    )
+
     Box(
         modifier = modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
@@ -448,7 +458,13 @@ private fun MenuButton(
                 shape = RoundedCornerShape(12.dp)
             )
             .background(DarkSurfaceVariant.copy(alpha = 0.6f))
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                haptic.lightTap()
+                onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Row(

@@ -34,6 +34,12 @@ private val hairColors = listOf(
     Color(0xFFD4A24C), Color(0xFFE53935), Color(0xFF333333)
 )
 
+private val clothingColors = listOf(
+    Color(0xFFC62828), Color(0xFF1565C0), Color(0xFF2E7D32),
+    Color(0xFF4527A0), Color(0xFF00695C), Color(0xFF37474F),
+    Color(0xFF6A1B9A), Color(0xFFAD1457)
+)
+
 @Composable
 fun SuspectAvatar(
     config: AvatarConfig,
@@ -43,6 +49,8 @@ fun SuspectAvatar(
 ) {
     val skinColor = skinTones.getOrElse(config.skinTone) { skinTones[0] }
     val hairColor = hairColors.getOrElse(config.hairColor) { hairColors[0] }
+    val skinShadow = Color.Black.copy(alpha = 0.2f).compositeOver(skinColor)
+    val clothingColor = clothingColors[(config.skinTone * 3 + config.hairStyle * 2 + config.hairColor) % clothingColors.size]
 
     val hasClues = clues.isNotEmpty()
     val inf = rememberInfiniteTransition(label = "avatar")
@@ -106,6 +114,17 @@ fun SuspectAvatar(
         label = "browAnim"
     )
 
+    // Animated idle breathing (subtle body scale oscillation)
+    val breathAnim by inf.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "breath"
+    )
+
     Canvas(modifier = modifier.size(size)) {
         val w = this.size.width
         val h = this.size.height
@@ -113,6 +132,7 @@ fun SuspectAvatar(
         val headRadius = w * 0.3f
         val headCenterY = h * 0.35f
         val trembleOffset = if (isNervous) tremble * w * 0.005f else 0f
+        val breathOffset = breathAnim * w * 0.006f
 
         // Dark circular background behind suspect
         drawCircle(
@@ -125,30 +145,67 @@ fun SuspectAvatar(
             center = Offset(centerX, h * 0.45f)
         )
 
-        // Neck
-        drawRect(
-            color = skinColor,
-            topLeft = Offset(centerX - w * 0.08f + trembleOffset, headCenterY + headRadius * 0.7f),
-            size = Size(w * 0.16f, h * 0.15f)
+        // Shadow under body (ground shadow)
+        drawOval(
+            brush = Brush.radialGradient(
+                colors = listOf(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.15f), Color.Transparent),
+                center = Offset(centerX, h * 0.92f)
+            ),
+            topLeft = Offset(centerX - w * 0.32f, h * 0.88f),
+            size = Size(w * 0.64f, h * 0.1f)
         )
 
-        // Body (shoulders)
-        drawOval(
-            color = Color(0xFF444444),
-            topLeft = Offset(centerX - w * 0.35f + trembleOffset, h * 0.65f),
-            size = Size(w * 0.7f, h * 0.4f)
+        // Neck with shadow
+        val neckTop = headCenterY + headRadius * 0.7f
+        drawRect(
+            color = skinColor,
+            topLeft = Offset(centerX - w * 0.07f + trembleOffset, neckTop),
+            size = Size(w * 0.14f, h * 0.15f)
         )
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(skinShadow, Color.Transparent),
+                startY = neckTop, endY = neckTop + headRadius * 0.4f
+            ),
+            topLeft = Offset(centerX - w * 0.07f + trembleOffset, neckTop),
+            size = Size(w * 0.14f, headRadius * 0.4f)
+        )
+
+        // Body (shoulders) — with breathing
+        val bodyTop = h * 0.65f
+        drawOval(
+            color = clothingColor,
+            topLeft = Offset(centerX - w * 0.35f + trembleOffset - breathOffset, bodyTop - breathOffset * 0.5f),
+            size = Size(w * 0.7f + breathOffset * 2f, h * 0.4f + breathOffset)
+        )
+        // Body highlight
+        drawOval(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color.White.copy(alpha = 0.12f), Color.Transparent),
+                startY = bodyTop, endY = bodyTop + h * 0.13f
+            ),
+            topLeft = Offset(centerX - w * 0.3f + trembleOffset, bodyTop + h * 0.01f),
+            size = Size(w * 0.6f, h * 0.14f)
+        )
+        // V-neckline
+        val necklinePath = Path().apply {
+            moveTo(centerX - w * 0.09f + trembleOffset, bodyTop)
+            lineTo(centerX + trembleOffset, bodyTop + h * 0.07f)
+            lineTo(centerX + w * 0.09f + trembleOffset, bodyTop)
+        }
+        drawPath(necklinePath, skinColor)
 
         // Arms crossed visual cue
         if (Clue.BRAS_CROISES in clues) {
+            val armColor = Color.White.copy(alpha = 0.12f).compositeOver(clothingColor)
             drawLine(
-                Color(0xFF555555),
+                armColor,
                 Offset(centerX - w * 0.3f, h * 0.78f),
                 Offset(centerX + w * 0.3f, h * 0.72f),
                 strokeWidth = w * 0.04f
             )
             drawLine(
-                Color(0xFF555555),
+                armColor,
                 Offset(centerX + w * 0.3f, h * 0.78f),
                 Offset(centerX - w * 0.3f, h * 0.72f),
                 strokeWidth = w * 0.04f
@@ -165,56 +222,110 @@ fun SuspectAvatar(
             size = Size(headRadius * 1.4f, headRadius * 0.5f)
         )
 
-        // Head with gradient
+        // Ears (behind head)
+        val earW = headRadius * 0.22f
+        val earH = headRadius * 0.32f
+        val earCenterY = headCenterY + headRadius * 0.05f
+        drawOval(skinColor, Offset(centerX - headRadius - earW * 0.35f + trembleOffset, earCenterY - earH / 2), Size(earW, earH))
+        drawOval(skinShadow, Offset(centerX - headRadius - earW * 0.1f + trembleOffset, earCenterY - earH * 0.3f), Size(earW * 0.5f, earH * 0.6f))
+        drawOval(skinColor, Offset(centerX + headRadius - earW * 0.65f + trembleOffset, earCenterY - earH / 2), Size(earW, earH))
+        drawOval(skinShadow, Offset(centerX + headRadius - earW * 0.4f + trembleOffset, earCenterY - earH * 0.3f), Size(earW * 0.5f, earH * 0.6f))
+
+        // Head
         drawCircle(color = skinColor, radius = headRadius, center = Offset(centerX + trembleOffset, headCenterY))
-        // Face gradient overlay (subtle light from top)
+        // Top-left highlight
         drawCircle(
-            brush = Brush.verticalGradient(
-                colors = listOf(Color.White.copy(alpha = 0.10f), Color.Transparent, Color.Black.copy(alpha = 0.10f)),
-                startY = headCenterY - headRadius,
-                endY = headCenterY + headRadius
+            brush = Brush.radialGradient(
+                colors = listOf(Color.White.copy(alpha = 0.15f), Color.Transparent),
+                center = Offset(centerX - headRadius * 0.25f + trembleOffset, headCenterY - headRadius * 0.35f),
+                radius = headRadius * 0.7f
             ),
             radius = headRadius,
             center = Offset(centerX + trembleOffset, headCenterY)
         )
-        // Thinner head outline
+        // Bottom shadow
         drawCircle(
-            color = skinColor.copy(alpha = 0.5f).compositeOver(Color(0xFF333333)),
+            brush = Brush.radialGradient(
+                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.12f)),
+                center = Offset(centerX + trembleOffset, headCenterY + headRadius * 0.5f),
+                radius = headRadius * 0.9f
+            ),
+            radius = headRadius,
+            center = Offset(centerX + trembleOffset, headCenterY)
+        )
+        // Side shadows
+        drawCircle(
+            brush = Brush.horizontalGradient(
+                colors = listOf(
+                    Color.Black.copy(alpha = 0.08f),
+                    Color.Transparent,
+                    Color.Transparent,
+                    Color.Black.copy(alpha = 0.08f)
+                ),
+                startX = centerX - headRadius + trembleOffset,
+                endX = centerX + headRadius + trembleOffset
+            ),
+            radius = headRadius,
+            center = Offset(centerX + trembleOffset, headCenterY)
+        )
+        // Cheek blush
+        drawCircle(Color(0xFFFF9999).copy(alpha = 0.1f), headRadius * 0.14f,
+            Offset(centerX - headRadius * 0.4f + trembleOffset, headCenterY + headRadius * 0.15f))
+        drawCircle(Color(0xFFFF9999).copy(alpha = 0.1f), headRadius * 0.14f,
+            Offset(centerX + headRadius * 0.4f + trembleOffset, headCenterY + headRadius * 0.15f))
+        // Head outline
+        drawCircle(
+            color = Color.Black.copy(alpha = 0.2f),
             radius = headRadius,
             center = Offset(centerX + trembleOffset, headCenterY),
-            style = Stroke(width = headRadius * 0.025f)
+            style = Stroke(width = headRadius * 0.02f)
         )
 
         // Hair
         drawHair(config.hairStyle, hairColor, centerX + trembleOffset, headCenterY, headRadius)
 
-        // Eyes with animation
+        // Eyes — larger and more expressive
         val eyeY = headCenterY - headRadius * 0.05f
-        val eyeSpacing = headRadius * 0.45f
+        val eyeSpacing = headRadius * 0.38f
+        val eyeW = headRadius * 0.28f
+        val eyeH = headRadius * 0.3f
         val eyeOffsetX = if (hasShiftyEyes) eyeShift * headRadius * 0.1f else 0f
 
-        // Eye whites
-        drawCircle(Color.White, headRadius * 0.18f, Offset(centerX - eyeSpacing + trembleOffset, eyeY))
-        drawCircle(Color.White, headRadius * 0.18f, Offset(centerX + eyeSpacing + trembleOffset, eyeY))
-        // Pupils (animated)
-        drawCircle(Color(0xFF2C1B0E), headRadius * 0.1f, Offset(centerX - eyeSpacing + eyeOffsetX + trembleOffset, eyeY))
-        drawCircle(Color(0xFF2C1B0E), headRadius * 0.1f, Offset(centerX + eyeSpacing + eyeOffsetX + trembleOffset, eyeY))
+        // Eye whites (oval)
+        drawOval(Color.White, Offset(centerX - eyeSpacing - eyeW / 2 + trembleOffset, eyeY - eyeH / 2), Size(eyeW, eyeH))
+        drawOval(Color.White, Offset(centerX + eyeSpacing - eyeW / 2 + trembleOffset, eyeY - eyeH / 2), Size(eyeW, eyeH))
+        // Iris
+        val irisR = headRadius * 0.11f
+        drawCircle(Color(0xFF5D4037), irisR, Offset(centerX - eyeSpacing + eyeOffsetX + trembleOffset, eyeY + headRadius * 0.02f))
+        drawCircle(Color(0xFF5D4037), irisR, Offset(centerX + eyeSpacing + eyeOffsetX + trembleOffset, eyeY + headRadius * 0.02f))
+        // Pupils
+        drawCircle(Color(0xFF1A1A1A), headRadius * 0.065f, Offset(centerX - eyeSpacing + eyeOffsetX + trembleOffset, eyeY + headRadius * 0.02f))
+        drawCircle(Color(0xFF1A1A1A), headRadius * 0.065f, Offset(centerX + eyeSpacing + eyeOffsetX + trembleOffset, eyeY + headRadius * 0.02f))
+        // Eye highlights
+        drawCircle(Color.White, headRadius * 0.045f, Offset(centerX - eyeSpacing + headRadius * 0.05f + trembleOffset, eyeY - headRadius * 0.05f))
+        drawCircle(Color.White, headRadius * 0.045f, Offset(centerX + eyeSpacing + headRadius * 0.05f + trembleOffset, eyeY - headRadius * 0.05f))
+        // Eye outlines
+        drawOval(Color.Black.copy(alpha = 0.25f), Offset(centerX - eyeSpacing - eyeW / 2 + trembleOffset, eyeY - eyeH / 2), Size(eyeW, eyeH), style = Stroke(headRadius * 0.02f))
+        drawOval(Color.Black.copy(alpha = 0.25f), Offset(centerX + eyeSpacing - eyeW / 2 + trembleOffset, eyeY - eyeH / 2), Size(eyeW, eyeH), style = Stroke(headRadius * 0.02f))
 
-        // Eyebrows (animated for nervous)
-        val browY = eyeY - headRadius * 0.22f
+        // Eyebrows (thicker, colored like hair)
+        val browY = eyeY - headRadius * 0.24f
         val browTilt = if (isNervous) browAnim * headRadius * 0.08f else 0f
         drawLine(
-            Color(0xFF2C1B0E),
-            Offset(centerX - eyeSpacing - headRadius * 0.12f + trembleOffset, browY + browTilt),
-            Offset(centerX - eyeSpacing + headRadius * 0.12f + trembleOffset, browY),
-            strokeWidth = headRadius * 0.06f
+            hairColor,
+            Offset(centerX - eyeSpacing - headRadius * 0.14f + trembleOffset, browY + browTilt),
+            Offset(centerX - eyeSpacing + headRadius * 0.14f + trembleOffset, browY),
+            strokeWidth = headRadius * 0.07f
         )
         drawLine(
-            Color(0xFF2C1B0E),
-            Offset(centerX + eyeSpacing - headRadius * 0.12f + trembleOffset, browY),
-            Offset(centerX + eyeSpacing + headRadius * 0.12f + trembleOffset, browY + browTilt),
-            strokeWidth = headRadius * 0.06f
+            hairColor,
+            Offset(centerX + eyeSpacing - headRadius * 0.14f + trembleOffset, browY),
+            Offset(centerX + eyeSpacing + headRadius * 0.14f + trembleOffset, browY + browTilt),
+            strokeWidth = headRadius * 0.07f
         )
+
+        // Nose
+        drawCircle(skinShadow, headRadius * 0.055f, Offset(centerX + trembleOffset, headCenterY + headRadius * 0.2f))
 
         // Mouth (animated)
         val mouthY = headCenterY + headRadius * 0.35f
@@ -283,20 +394,45 @@ fun SuspectAvatar(
 }
 
 private fun DrawScope.drawHair(style: Int, color: Color, cx: Float, cy: Float, r: Float) {
+    val shadow = Color.Black.copy(alpha = 0.25f).compositeOver(color)
+    val highlight = Color.White.copy(alpha = 0.18f).compositeOver(color)
     when (style % 4) {
-        0 -> { // Short
-            drawArc(color, 180f, 180f, true, Offset(cx - r * 1.05f, cy - r * 1.1f), Size(r * 2.1f, r * 1.4f))
+        0 -> { // Short swept
+            drawArc(shadow, 180f, 180f, true, Offset(cx - r * 1.08f, cy - r * 1.05f), Size(r * 2.16f, r * 1.35f))
+            drawArc(color, 180f, 180f, true, Offset(cx - r * 1.08f, cy - r * 1.12f), Size(r * 2.16f, r * 1.4f))
+            drawArc(color, 200f, 140f, true, Offset(cx - r * 0.9f, cy - r * 1.25f), Size(r * 1.8f, r * 0.9f))
+            drawArc(highlight, 210f, 60f, true, Offset(cx - r * 0.6f, cy - r * 1.2f), Size(r * 1.0f, r * 0.5f))
         }
-        1 -> { // Flat top
-            drawRect(color, Offset(cx - r * 0.9f, cy - r * 1.15f), Size(r * 1.8f, r * 0.6f))
+        1 -> { // Crew cut
+            drawArc(shadow, 180f, 180f, true, Offset(cx - r * 1.02f, cy - r * 1.0f), Size(r * 2.04f, r * 1.1f))
+            drawArc(color, 180f, 180f, true, Offset(cx - r * 1.02f, cy - r * 1.08f), Size(r * 2.04f, r * 1.15f))
+            drawRect(color, Offset(cx - r * 0.85f, cy - r * 1.15f), Size(r * 1.7f, r * 0.45f))
+            drawRect(highlight, Offset(cx - r * 0.5f, cy - r * 1.15f), Size(r * 0.8f, r * 0.15f))
         }
-        2 -> { // Long
-            drawArc(color, 180f, 180f, true, Offset(cx - r * 1.1f, cy - r * 1.15f), Size(r * 2.2f, r * 1.5f))
-            drawRect(color, Offset(cx - r * 1.1f, cy - r * 0.2f), Size(r * 0.3f, r * 0.8f))
-            drawRect(color, Offset(cx + r * 0.8f, cy - r * 0.2f), Size(r * 0.3f, r * 0.8f))
+        2 -> { // Long flowing
+            drawOval(shadow, Offset(cx - r * 1.18f, cy - r * 0.3f), Size(r * 0.42f, r * 1.1f))
+            drawOval(shadow, Offset(cx + r * 0.76f, cy - r * 0.3f), Size(r * 0.42f, r * 1.1f))
+            drawOval(color, Offset(cx - r * 1.15f, cy - r * 0.35f), Size(r * 0.4f, r * 1.05f))
+            drawOval(color, Offset(cx + r * 0.75f, cy - r * 0.35f), Size(r * 0.4f, r * 1.05f))
+            drawArc(shadow, 180f, 180f, true, Offset(cx - r * 1.15f, cy - r * 1.1f), Size(r * 2.3f, r * 1.45f))
+            drawArc(color, 180f, 180f, true, Offset(cx - r * 1.15f, cy - r * 1.18f), Size(r * 2.3f, r * 1.5f))
+            drawArc(highlight, 200f, 80f, true, Offset(cx - r * 0.7f, cy - r * 1.15f), Size(r * 1.2f, r * 0.6f))
         }
         3 -> { // Spiky
-            drawArc(color, 180f, 180f, true, Offset(cx - r, cy - r * 1.2f), Size(r * 2f, r * 1.2f))
+            drawArc(shadow, 180f, 180f, true, Offset(cx - r * 1.05f, cy - r * 1.1f), Size(r * 2.1f, r * 1.2f))
+            drawArc(color, 180f, 180f, true, Offset(cx - r * 1.05f, cy - r * 1.2f), Size(r * 2.1f, r * 1.25f))
+            val spikePath = Path().apply {
+                moveTo(cx - r * 0.7f, cy - r * 1.1f)
+                lineTo(cx - r * 0.55f, cy - r * 1.45f)
+                lineTo(cx - r * 0.25f, cy - r * 1.15f)
+                lineTo(cx - r * 0.05f, cy - r * 1.5f)
+                lineTo(cx + r * 0.2f, cy - r * 1.15f)
+                lineTo(cx + r * 0.45f, cy - r * 1.4f)
+                lineTo(cx + r * 0.7f, cy - r * 1.1f)
+                close()
+            }
+            drawPath(spikePath, color)
+            drawArc(highlight, 210f, 60f, true, Offset(cx - r * 0.5f, cy - r * 1.3f), Size(r * 0.8f, r * 0.4f))
         }
     }
 }

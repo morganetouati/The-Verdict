@@ -2,11 +2,20 @@ package com.theverdict.app.ui.screens.verdict
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -210,18 +221,49 @@ fun VerdictScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Confirm button — gold gradient when enabled
+                // Confirm button — gold gradient when enabled, with pulse and haptic
                 val hasSelection = selectedIds.isNotEmpty() || nobodySelected == 1
+                var isSubmitting by remember { mutableStateOf(false) }
+
+                // Dramatic overlay when submitting
+                val overlayAlpha by animateFloatAsState(
+                    targetValue = if (isSubmitting) 1f else 0f,
+                    animationSpec = tween(400),
+                    label = "overlay"
+                )
+
+                // Pulsing glow when selectable
+                val inf = rememberInfiniteTransition(label = "verdictPulse")
+                val pulseGlow by inf.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 0.7f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "verdGlow"
+                )
+
+                val verdictInteraction = remember { MutableInteractionSource() }
+                val verdictPressed by verdictInteraction.collectIsPressedAsState()
+                val verdictScale by animateFloatAsState(
+                    targetValue = if (verdictPressed) 0.94f else 1f,
+                    animationSpec = tween(100),
+                    label = "verdScale"
+                )
+
                 if (hasSelection) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .graphicsLayer { scaleX = verdictScale; scaleY = verdictScale }
                             .drawBehind {
+                                // Pulsing gold glow behind button
                                 drawRoundRect(
-                                    brush = Brush.verticalGradient(listOf(Color(0x40D4A24C), Color.Transparent)),
+                                    brush = Brush.verticalGradient(listOf(Color(0xFFD4A24C).copy(alpha = pulseGlow), Color.Transparent)),
                                     cornerRadius = CornerRadius(24.dp.toPx()),
-                                    topLeft = Offset(0f, 4.dp.toPx()),
-                                    size = Size(size.width, size.height + 4.dp.toPx())
+                                    topLeft = Offset(-4.dp.toPx(), -2.dp.toPx()),
+                                    size = Size(size.width + 8.dp.toPx(), size.height + 8.dp.toPx())
                                 )
                             }
                     ) {
@@ -231,21 +273,32 @@ fun VerdictScreen(
                                 .height(56.dp)
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight)))
-                                .clickable {
-                                    haptic.medium()
-                                    scope.launch {
-                                        val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
-                                        val result = playerRepository.applyVerdict(profile, case, liarIds)
-                                        onResult(result.isCorrect, result.pointsChange)
+                                .clickable(
+                                    interactionSource = verdictInteraction,
+                                    indication = null
+                                ) {
+                                    if (!isSubmitting) {
+                                        haptic.heavyImpact()
+                                        isSubmitting = true
+                                        scope.launch {
+                                            delay(500) // dramatic pause
+                                            val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
+                                            val result = playerRepository.applyVerdict(profile, case, liarIds)
+                                            onResult(result.isCorrect, result.pointsChange)
+                                        }
                                     }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                "CONFIRMER LE VERDICT",
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp),
-                                color = DarkBackground
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Gavel, contentDescription = null, tint = DarkBackground, modifier = Modifier.size(22.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    "CONFIRMER LE VERDICT",
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp),
+                                    color = DarkBackground
+                                )
+                            }
                         }
                     }
                 } else {
@@ -268,6 +321,8 @@ fun VerdictScreen(
         }
     }
 }
+
+// Unused overlay alpha – kept for future dramatic transition if needed
 
 @Composable
 private fun SuspectVerdictCard(

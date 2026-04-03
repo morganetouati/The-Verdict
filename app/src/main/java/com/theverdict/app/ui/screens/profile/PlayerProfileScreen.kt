@@ -49,7 +49,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.data.repository.PlayerRepository
@@ -308,56 +310,107 @@ private fun DrawScope.drawJudgeAvatar(costume: JudgeCostume) {
     val w = size.width
     val h = size.height
     val cx = w / 2f
+    val skinColor = Color(0xFFE0AC69)
+    val skinShadow = Color(0xFFCC9050)
 
-    // Body/Robe
+    // Robe body with gradient
     drawOval(
-        color = costume.robeColor,
+        brush = Brush.verticalGradient(
+            colors = listOf(costume.robeColor, Color.Black.copy(alpha = 0.2f).compositeOver(costume.robeColor)),
+            startY = h * 0.55f, endY = h * 1.0f
+        ),
         topLeft = Offset(cx - w * 0.38f, h * 0.55f),
         size = Size(w * 0.76f, h * 0.5f)
     )
+    // Robe highlight
+    drawOval(
+        brush = Brush.verticalGradient(
+            colors = listOf(Color.White.copy(alpha = 0.08f), Color.Transparent),
+            startY = h * 0.55f, endY = h * 0.70f
+        ),
+        topLeft = Offset(cx - w * 0.3f, h * 0.56f),
+        size = Size(w * 0.6f, h * 0.15f)
+    )
 
     // Collar
+    drawOval(costume.collarColor, Offset(cx - w * 0.18f, h * 0.48f), Size(w * 0.36f, h * 0.14f))
     drawOval(
-        color = costume.collarColor,
-        topLeft = Offset(cx - w * 0.15f, h * 0.50f),
-        size = Size(w * 0.30f, h * 0.12f)
+        brush = Brush.verticalGradient(listOf(Color.Transparent, costume.robeColor.copy(alpha = 0.3f))),
+        topLeft = Offset(cx - w * 0.14f, h * 0.52f), size = Size(w * 0.28f, h * 0.08f)
     )
 
-    // Head (skin tone)
+    // Neck
+    drawRect(skinColor, Offset(cx - w * 0.06f, h * 0.42f), Size(w * 0.12f, h * 0.12f))
+    drawRect(
+        brush = Brush.verticalGradient(listOf(skinShadow, Color.Transparent), startY = h * 0.42f, endY = h * 0.47f),
+        topLeft = Offset(cx - w * 0.06f, h * 0.42f), size = Size(w * 0.12f, h * 0.05f)
+    )
+
+    // Ears
+    val headR = w * 0.20f
+    val earW = headR * 0.22f
+    val earH = headR * 0.3f
+    drawOval(skinColor, Offset(cx - headR - earW * 0.3f, h * 0.33f), Size(earW, earH))
+    drawOval(skinShadow, Offset(cx - headR - earW * 0.1f, h * 0.34f), Size(earW * 0.5f, earH * 0.6f))
+    drawOval(skinColor, Offset(cx + headR - earW * 0.7f, h * 0.33f), Size(earW, earH))
+    drawOval(skinShadow, Offset(cx + headR - earW * 0.4f, h * 0.34f), Size(earW * 0.5f, earH * 0.6f))
+
+    // Head
+    drawCircle(skinColor, headR, Offset(cx, h * 0.35f))
     drawCircle(
-        color = Color(0xFFE0AC69),
-        radius = w * 0.20f,
-        center = Offset(cx, h * 0.35f)
+        brush = Brush.radialGradient(
+            colors = listOf(Color.White.copy(alpha = 0.12f), Color.Transparent),
+            center = Offset(cx - headR * 0.25f, h * 0.28f), radius = headR * 0.7f
+        ),
+        radius = headR, center = Offset(cx, h * 0.35f)
     )
-
-    // Judge wig
-    drawArc(
-        color = Color(0xFFDDDDDD),
-        startAngle = 180f, sweepAngle = 180f, useCenter = true,
-        topLeft = Offset(cx - w * 0.24f, h * 0.15f),
-        size = Size(w * 0.48f, w * 0.30f)
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.1f)),
+            center = Offset(cx, h * 0.45f), radius = headR * 0.9f
+        ),
+        radius = headR, center = Offset(cx, h * 0.35f)
     )
-    // Wig curls
-    drawCircle(Color(0xFFDDDDDD), w * 0.06f, Offset(cx - w * 0.22f, h * 0.38f))
-    drawCircle(Color(0xFFDDDDDD), w * 0.06f, Offset(cx + w * 0.22f, h * 0.38f))
+    drawCircle(Color.Black.copy(alpha = 0.15f), headR, Offset(cx, h * 0.35f), style = Stroke(w * 0.005f))
 
-    // Eyes
-    drawCircle(Color(0xFF2C1B0E), w * 0.03f, Offset(cx - w * 0.08f, h * 0.33f))
-    drawCircle(Color(0xFF2C1B0E), w * 0.03f, Offset(cx + w * 0.08f, h * 0.33f))
+    // Judge wig — cascading curls
+    drawArc(Color(0xFFEEEEEE), 180f, 180f, true, Offset(cx - w * 0.28f, h * 0.12f), Size(w * 0.56f, w * 0.38f))
+    drawArc(Color(0xFFCCCCCC), 180f, 180f, true, Offset(cx - w * 0.26f, h * 0.20f), Size(w * 0.52f, w * 0.18f))
+    drawArc(Color.White, 200f, 80f, true, Offset(cx - w * 0.16f, h * 0.13f), Size(w * 0.32f, w * 0.16f))
+    // Side curls
+    drawCircle(Color(0xFFEEEEEE), w * 0.07f, Offset(cx - w * 0.25f, h * 0.38f))
+    drawCircle(Color(0xFFDDDDDD), w * 0.065f, Offset(cx - w * 0.23f, h * 0.46f))
+    drawCircle(Color(0xFFEEEEEE), w * 0.058f, Offset(cx - w * 0.21f, h * 0.53f))
+    drawCircle(Color(0xFFEEEEEE), w * 0.07f, Offset(cx + w * 0.25f, h * 0.38f))
+    drawCircle(Color(0xFFDDDDDD), w * 0.065f, Offset(cx + w * 0.23f, h * 0.46f))
+    drawCircle(Color(0xFFEEEEEE), w * 0.058f, Offset(cx + w * 0.21f, h * 0.53f))
 
-    // Mouth
-    drawLine(
-        Color(0xFF2C1B0E),
-        Offset(cx - w * 0.05f, h * 0.40f),
-        Offset(cx + w * 0.05f, h * 0.40f),
-        strokeWidth = w * 0.02f
-    )
+    // Eyes — larger with highlights
+    val eyeY = h * 0.33f
+    val eyeSp = w * 0.08f
+    val jEyeW = w * 0.08f
+    val jEyeH = w * 0.07f
+    drawOval(Color.White, Offset(cx - eyeSp - jEyeW / 2, eyeY - jEyeH / 2), Size(jEyeW, jEyeH))
+    drawOval(Color.White, Offset(cx + eyeSp - jEyeW / 2, eyeY - jEyeH / 2), Size(jEyeW, jEyeH))
+    drawCircle(Color(0xFF5D4037), w * 0.025f, Offset(cx - eyeSp, eyeY))
+    drawCircle(Color(0xFF5D4037), w * 0.025f, Offset(cx + eyeSp, eyeY))
+    drawCircle(Color(0xFF1A1A1A), w * 0.015f, Offset(cx - eyeSp, eyeY))
+    drawCircle(Color(0xFF1A1A1A), w * 0.015f, Offset(cx + eyeSp, eyeY))
+    drawCircle(Color.White, w * 0.008f, Offset(cx - eyeSp + w * 0.01f, eyeY - w * 0.01f))
+    drawCircle(Color.White, w * 0.008f, Offset(cx + eyeSp + w * 0.01f, eyeY - w * 0.01f))
+
+    // Nose
+    drawCircle(skinShadow, w * 0.013f, Offset(cx, h * 0.375f))
+
+    // Mouth — subtle smile
+    drawArc(Color(0xFF2C1B0E), 0f, 180f, false,
+        Offset(cx - w * 0.04f, h * 0.40f), Size(w * 0.08f, w * 0.04f))
+
+    // Cheek blush
+    drawCircle(Color(0xFFFF9999).copy(alpha = 0.08f), w * 0.03f, Offset(cx - w * 0.12f, h * 0.38f))
+    drawCircle(Color(0xFFFF9999).copy(alpha = 0.08f), w * 0.03f, Offset(cx + w * 0.12f, h * 0.38f))
 
     // Gavel accent
     drawCircle(costume.accentColor, w * 0.04f, Offset(cx + w * 0.30f, h * 0.65f))
-    drawRect(
-        costume.accentColor,
-        Offset(cx + w * 0.28f, h * 0.65f),
-        Size(w * 0.10f, w * 0.03f)
-    )
+    drawRect(costume.accentColor, Offset(cx + w * 0.28f, h * 0.65f), Size(w * 0.10f, w * 0.03f))
 }
