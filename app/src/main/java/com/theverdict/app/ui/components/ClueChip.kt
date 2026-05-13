@@ -2,6 +2,7 @@ package com.theverdict.app.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,7 +41,7 @@ fun ClueChip(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier,
+        modifier = modifier.heightIn(min = 48.dp),
         shape = RoundedCornerShape(16.dp),
         color = ClueChipBackground
     ) {

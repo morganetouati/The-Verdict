@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.theverdict.app.data.repository.CaseRepository
@@ -67,7 +69,7 @@ fun CasePresentationScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
     ) {
@@ -95,7 +97,8 @@ fun CasePresentationScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(dim.paddingLarge),
+                    .padding(dim.paddingLarge)
+                    .navigationBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Theme badge pill
@@ -130,6 +133,8 @@ fun CasePresentationScreen(
                     ),
                     color = TextWhite,
                     textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth()
                 )
 

@@ -103,7 +103,7 @@ fun TutorialScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
             .padding(24.dp)

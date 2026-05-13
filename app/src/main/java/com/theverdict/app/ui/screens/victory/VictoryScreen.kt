@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -65,6 +66,7 @@ fun VictoryScreen(
                     colors = listOf(DarkBackground, Color(0xFF1A1500), Color(0xFF141008), DarkBackground)
                 )
             )
+            .safeDrawingPadding()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -87,8 +89,8 @@ fun VictoryScreen(
             Canvas(modifier = Modifier.size(72.dp)) {
                 val w = size.width
                 val h = size.height
-                val gold = Color(0xFFFFD700)
-                val goldD = Color(0xFFD4A24C)
+                val gold = RankOracle
+                val goldD = GoldPrimary
                 val sw = w * 0.05f
                 // Cup bowl
                 drawArc(gold, 0f, 180f, false, Offset(w * 0.18f, h * 0.08f), Size(w * 0.64f, h * 0.50f), style = androidx.compose.ui.graphics.drawscope.Stroke(sw * 1.5f))

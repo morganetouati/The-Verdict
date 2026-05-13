@@ -15,9 +15,9 @@ sealed class Screen(val route: String) {
     data object Verdict : Screen("verdict/{themeIndex}/{caseIndex}") {
         fun createRoute(themeIndex: Int, caseIndex: Int) = "verdict/$themeIndex/$caseIndex"
     }
-    data object Result : Screen("result/{themeIndex}/{caseIndex}/{isCorrect}/{pointsChange}") {
-        fun createRoute(themeIndex: Int, caseIndex: Int, isCorrect: Boolean, pointsChange: Int) =
-            "result/$themeIndex/$caseIndex/$isCorrect/$pointsChange"
+    data object Result : Screen("result/{themeIndex}/{caseIndex}/{isCorrect}/{pointsChange}/{streakBonus}/{winStreak}") {
+        fun createRoute(themeIndex: Int, caseIndex: Int, isCorrect: Boolean, pointsChange: Int, streakBonus: Int = 0, winStreak: Int = 0) =
+            "result/$themeIndex/$caseIndex/$isCorrect/$pointsChange/$streakBonus/$winStreak"
     }
     data object Reputation : Screen("reputation")
     data object GameOver : Screen("gameover")

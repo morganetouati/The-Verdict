@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -91,19 +93,22 @@ fun MainMenuScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
     ) {
         // Floating golden particles
         ParticleBackground()
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = dim.paddingLarge, vertical = dim.paddingMedium),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(horizontal = dim.paddingLarge, vertical = dim.paddingMedium),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(dim.paddingSmall)
         ) {
+            item {
             Spacer(Modifier.height(dim.topSpacing))
 
             // ─── Scales of Justice icon with golden glow ───
@@ -132,8 +137,8 @@ fun MainMenuScreen(
                 Canvas(modifier = Modifier.size((iconSizeDp * 0.7f).dp)) {
                     val w = size.width
                     val h = size.height
-                    val gold = Color(0xFFD4A24C)
-                    val goldL = Color(0xFFE8C97A)
+                    val gold = GoldPrimary
+                    val goldL = GoldLight
                     val sw = w * 0.028f
 
                     drawLine(gold, Offset(w * 0.5f, h * 0.12f), Offset(w * 0.5f, h * 0.82f), sw * 1.3f, StrokeCap.Round)
@@ -225,11 +230,33 @@ fun MainMenuScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = "${profile.completedCaseIds.size}/80 affaires",
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                            color = TextGray
-                        )
+                        // Daily streak & win streak indicators
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (profile.streakDays > 0) {
+                                Text(
+                                    text = "🔥 ${profile.streakDays}j",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ComboFire
+                                )
+                                Spacer(Modifier.width(8.dp))
+                            }
+                            if (profile.winStreak >= 2) {
+                                Text(
+                                    text = "⚡ ×${profile.winStreak}",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ComboGold
+                                )
+                                Spacer(Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = "${profile.completedCaseIds.size}/80",
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                                color = TextGray
+                            )
+                        }
                     }
 
                     Spacer(Modifier.width(16.dp))
@@ -237,10 +264,10 @@ fun MainMenuScreen(
                     // Right: Success rate ring
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier.size(dim.avatarSizeSmall)
                     ) {
                         val rate = profile.successRate.toFloat()
-                        Canvas(modifier = Modifier.size(64.dp)) {
+                        Canvas(modifier = Modifier.size(dim.avatarSizeSmall)) {
                             val strokeW = 5.dp.toPx()
                             val arcSize = Size(size.width - strokeW, size.height - strokeW)
                             val arcOffset = Offset(strokeW / 2, strokeW / 2)
@@ -403,25 +430,24 @@ fun MainMenuScreen(
             )
             Spacer(Modifier.height(dim.paddingSmall))
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(dim.paddingSmall)
-            ) {
-                itemsIndexed(CaseTheme.entries.toList()) { index, theme ->
-                    val isUnlocked = playerRepository.isThemeUnlocked(theme, profile)
-                    val progress = profile.themeProgress[index] ?: 0
+            } // end header item
 
-                    ThemeCard(
-                        theme = theme,
-                        isUnlocked = isUnlocked,
-                        progress = progress,
-                        isCurrent = index == profile.currentThemeIndex,
-                        onClick = {
-                            if (isUnlocked) onPlay(index, 0)
-                        }
-                    )
-                }
+            itemsIndexed(CaseTheme.entries.toList(), key = { index, _ -> index }) { index, theme ->
+                val isUnlocked = playerRepository.isThemeUnlocked(theme, profile)
+                val progress = profile.themeProgress[index] ?: 0
+
+                ThemeCard(
+                    theme = theme,
+                    isUnlocked = isUnlocked,
+                    progress = progress,
+                    isCurrent = index == profile.currentThemeIndex,
+                    onClick = {
+                        if (isUnlocked) onPlay(index, 0)
+                    }
+                )
             }
+
+            item { Spacer(Modifier.height(dim.paddingMedium)) }
         }
     }
 }

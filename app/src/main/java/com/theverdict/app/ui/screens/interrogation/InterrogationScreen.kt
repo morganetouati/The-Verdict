@@ -3,6 +3,7 @@ package com.theverdict.app.ui.screens.interrogation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,10 +30,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.data.repository.CaseRepository
 import com.theverdict.app.domain.model.CaseTheme
 import com.theverdict.app.ui.components.InteractiveAvatar
+import com.theverdict.app.ui.components.ErrorState
 import com.theverdict.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +57,7 @@ fun InterrogationScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
     ) {
@@ -82,7 +85,8 @@ fun InterrogationScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
+                    .padding(24.dp)
+                    .navigationBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Name with shadow
@@ -96,7 +100,9 @@ fun InterrogationScreen(
                             blurRadius = 8f
                         )
                     ),
-                    color = TextWhite
+                    color = TextWhite,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -141,11 +147,15 @@ fun InterrogationScreen(
                         Text(
                             text = "« ${suspect.phrase} »",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = TextWhite
+                            color = TextWhite,
+                            maxLines = 8,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
             }
+        } else {
+            ErrorState(message = "Suspect introuvable", onBack = onBack)
         }
     }
 }

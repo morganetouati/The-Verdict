@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -99,7 +100,8 @@ fun SplashScreen(
         contentAlignment = Alignment.Center
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.safeDrawingPadding()
         ) {
             // Scales of Justice icon with animated glow
             Box(
@@ -131,8 +133,8 @@ fun SplashScreen(
                 Canvas(modifier = Modifier.size(98.dp)) {
                     val w = size.width
                     val h = size.height
-                    val gold = Color(0xFFD4A24C)
-                    val goldL = Color(0xFFE8C97A)
+                    val gold = GoldPrimary
+                    val goldL = GoldLight
                     val sw = w * 0.028f
 
                     // Central pillar

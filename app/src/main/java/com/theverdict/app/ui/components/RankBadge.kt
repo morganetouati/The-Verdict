@@ -20,6 +20,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.domain.model.Rank
@@ -31,15 +33,21 @@ fun RankBadge(
     modifier: Modifier = Modifier
 ) {
     val color = when (rank) {
-        Rank.DEBUTANT -> RankDebutant
-        Rank.JUGE -> RankJuge
-        Rank.BON_JUGE -> RankBonJuge
-        Rank.EXPERT -> RankExpert
-        Rank.LEGENDE -> RankLegende
+        Rank.OBSERVATEUR  -> RankObservateur
+        Rank.ENQUETEUR    -> RankEnqueteur
+        Rank.INSPECTEUR   -> RankInspecteur
+        Rank.DETECTIVE    -> RankDetective
+        Rank.COMMISSAIRE  -> RankCommissaire
+        Rank.PROFILEUR    -> RankProfileur
+        Rank.MENTALISTE   -> RankMentaliste
+        Rank.ORACLE       -> RankOracle
+        Rank.INFILTRE     -> RankInfiltre
+        Rank.LEGENDE      -> RankLegende
     }
 
     Surface(
         modifier = modifier
+            .semantics { contentDescription = "Rang : ${rank.emoji} ${rank.displayName}" }
             .drawBehind {
                 drawCircle(
                     brush = Brush.radialGradient(

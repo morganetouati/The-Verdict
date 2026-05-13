@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import com.theverdict.app.ui.theme.DarkCard
+import com.theverdict.app.ui.theme.DarkSurface
+import com.theverdict.app.ui.theme.DarkSurfaceVariant
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -41,11 +43,11 @@ fun ShimmerBox(
 
     val shimmerBrush = Brush.linearGradient(
         colors = listOf(
-            Color(0xFF1A1A1A),
-            Color(0xFF2A2A2A),
-            Color(0xFF3A3A3A),
-            Color(0xFF2A2A2A),
-            Color(0xFF1A1A1A)
+            DarkSurface,
+            DarkSurfaceVariant,
+            DarkCard.copy(alpha = 0.8f),
+            DarkSurfaceVariant,
+            DarkSurface
         ),
         start = Offset(offsetX, 0f),
         end = Offset(offsetX + 400f, 200f)

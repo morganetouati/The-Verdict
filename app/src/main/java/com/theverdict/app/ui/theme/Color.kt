@@ -7,40 +7,59 @@ val GoldPrimary = Color(0xFFD4A24C)
 val GoldLight = Color(0xFFE8C97A)
 val GoldDark = Color(0xFFB8862E)
 
-// Background
-val DarkBackground = Color(0xFF0D0D0D)
-val DarkSurface = Color(0xFF1A1A1A)
-val DarkSurfaceVariant = Color(0xFF2A2A2A)
-val DarkCard = Color(0xFF222222)
+// Neon accents — cyber-noir modernity
+val NeonCyan = Color(0xFF00E5FF)
+val NeonCyanDark = Color(0xFF00B8CC)
+val NeonPurple = Color(0xFFBB86FC)
+val NeonPurpleDark = Color(0xFF9B67E0)
+
+// Background — deep blue-tinted noir
+val DarkBackground = Color(0xFF07070F)
+val DarkMid = Color(0xFF0B0B18)
+val DarkSurface = Color(0xFF0F0F1C)
+val DarkSurfaceVariant = Color(0xFF1A1A2E)
+val DarkCard = Color(0xFF13131F)
 
 // On colors
-val TextWhite = Color(0xFFF5F5F5)
-val TextGray = Color(0xFFAAAAAA)
-val TextDimmed = Color(0xFF666666)
+val TextWhite = Color(0xFFF0F0FF)
+val TextGray = Color(0xFFA0A0C0)
+val TextDimmed = Color(0xFF6B6B8A)
 
-// Verdict colors
-val VerdictCorrect = Color(0xFF4CAF50)
-val VerdictCorrectLight = Color(0xFF81C784)
-val VerdictWrong = Color(0xFFE53935)
-val VerdictWrongLight = Color(0xFFEF5350)
+// Verdict colors — neon vivid
+val VerdictCorrect = Color(0xFF00E676)
+val VerdictCorrectLight = Color(0xFF69F0AE)
+val VerdictWrong = Color(0xFFFF1744)
+val VerdictWrongLight = Color(0xFFFF6D6D)
 
-// Rank colors
-val RankDebutant = Color(0xFF9E9E9E)
-val RankJuge = Color(0xFF42A5F5)
-val RankBonJuge = Color(0xFF66BB6A)
-val RankExpert = Color(0xFFAB47BC)
-val RankLegende = Color(0xFFFFD700)
+// Rank colors — 10-level gradient (steel → neon cyan)
+val RankObservateur = Color(0xFF78909C)
+val RankEnqueteur = Color(0xFF42A5F5)
+val RankInspecteur = Color(0xFF26C6DA)
+val RankDetective = Color(0xFF66BB6A)
+val RankCommissaire = Color(0xFFAB47BC)
+val RankProfileur = Color(0xFFFF7043)
+val RankMentaliste = Color(0xFFFFCA28)
+val RankOracle = Color(0xFFFFD700)
+val RankInfiltre = Color(0xFF7C4DFF)
+val RankLegende = Color(0xFF00E5FF)
+
+// Combo / Streak
+val ComboFire = Color(0xFFFF6D00)
+val ComboGold = Color(0xFFFFD700)
 
 // Clue chip
-val ClueChipBackground = Color(0xFF333333)
-val ClueChipText = Color(0xFFE0E0E0)
+val ClueChipBackground = Color(0xFF1C1C30)
+val ClueChipText = Color(0xFFDDDDFF)
 
 // Timer
-val TimerNormal = Color(0xFF42A5F5)
+val TimerNormal = Color(0xFF00E5FF)
+val TimerNormalLight = Color(0xFF64B5F6)
 val TimerWarning = Color(0xFFFF9800)
-val TimerCritical = Color(0xFFE53935)
+val TimerWarningLight = Color(0xFFFFB74D)
+val TimerCritical = Color(0xFFFF1744)
+val TimerCriticalLight = Color(0xFFFF6D6D)
 
-// Accent / Modern additions
-val AccentBlue = Color(0xFF5C6BC0)
+// Accent
+val AccentBlue = Color(0xFF3F51B5)
 val AccentPurple = Color(0xFF7E57C2)
-val CardBorder = Color(0xFF3A3A3A)
+val CardBorder = Color(0xFF252540)

@@ -19,9 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import com.theverdict.app.ui.theme.*
 
 @Composable
@@ -43,12 +44,12 @@ fun TimerBar(
     }
 
     val colorLight = when {
-        remainingSeconds <= 15 -> Color(0xFFEF5350)
-        remainingSeconds <= 30 -> Color(0xFFFFB74D)
-        else -> Color(0xFF64B5F6)
+        remainingSeconds <= 15 -> TimerCriticalLight
+        remainingSeconds <= 30 -> TimerWarningLight
+        else -> TimerNormalLight
     }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.semantics { contentDescription = "Temps restant : ${remainingSeconds} secondes" }) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically

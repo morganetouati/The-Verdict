@@ -17,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +75,7 @@ import com.theverdict.app.domain.model.PlayerProfile
 import com.theverdict.app.domain.model.Suspect
 import com.theverdict.app.ui.components.SuspectAvatar
 import com.theverdict.app.ui.components.TimerBar
+import com.theverdict.app.ui.components.ErrorState
 import com.theverdict.app.ui.theme.*
 import com.theverdict.app.ui.util.LocalHapticManager
 import kotlinx.coroutines.delay
@@ -83,7 +88,7 @@ fun VerdictScreen(
     playerRepository: PlayerRepository,
     themeIndex: Int,
     caseIndex: Int,
-    onResult: (isCorrect: Boolean, pointsChange: Int) -> Unit
+    onResult: (isCorrect: Boolean, pointsChange: Int, streakBonus: Int, winStreak: Int) -> Unit
 ) {
     val theme = CaseTheme.entries[themeIndex]
     val case = caseRepository.getCase(theme, caseIndex)
@@ -92,6 +97,8 @@ fun VerdictScreen(
     val selectedIds = remember { mutableStateListOf<Int>() }
     var nobodySelected by remember { mutableIntStateOf(0) }
     val haptic = LocalHapticManager.current
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     // Timer
     var remainingSeconds by remember { mutableIntStateOf(90) }
@@ -107,7 +114,7 @@ fun VerdictScreen(
             if (case != null) {
                 scope.launch {
                     val result = playerRepository.applyVerdict(profile, case, emptyList())
-                    onResult(result.isCorrect, result.pointsChange)
+                    onResult(result.isCorrect, result.pointsChange, result.streakBonus, result.newWinStreak)
                 }
             }
         }
@@ -118,7 +125,7 @@ fun VerdictScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
     ) {
@@ -141,10 +148,36 @@ fun VerdictScreen(
         )
 
         if (case != null) {
+            // Confirmation dialog
+            if (showConfirmDialog) {
+                AlertDialog(
+                    onDismissRequest = { showConfirmDialog = false },
+                    title = { Text("Confirmer le verdict", color = TextWhite) },
+                    text = { Text("Êtes-vous sûr de votre choix ? Cette action est irréversible.", color = TextGray) },
+                    confirmButton = {
+                        Button(onClick = {
+                            showConfirmDialog = false
+                            haptic.heavyImpact()
+                            isSubmitting = true
+                            scope.launch {
+                                delay(500)
+                                val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
+                                val result = playerRepository.applyVerdict(profile, case, liarIds)
+                                onResult(result.isCorrect, result.pointsChange, result.streakBonus, result.newWinStreak)
+                            }
+                        }) { Text("Confirmer") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showConfirmDialog = false }) { Text("Annuler") }
+                    },
+                    containerColor = DarkCard
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(24.dp)
+                    .navigationBarsPadding()
             ) {
                 // Timer bar
                 if (hasTimer) {
@@ -223,7 +256,6 @@ fun VerdictScreen(
 
                 // Confirm button — gold gradient when enabled, with pulse and haptic
                 val hasSelection = selectedIds.isNotEmpty() || nobodySelected == 1
-                var isSubmitting by remember { mutableStateOf(false) }
 
                 // Dramatic overlay when submitting
                 val overlayAlpha by animateFloatAsState(
@@ -260,7 +292,7 @@ fun VerdictScreen(
                             .drawBehind {
                                 // Pulsing gold glow behind button
                                 drawRoundRect(
-                                    brush = Brush.verticalGradient(listOf(Color(0xFFD4A24C).copy(alpha = pulseGlow), Color.Transparent)),
+                                    brush = Brush.verticalGradient(listOf(GoldPrimary.copy(alpha = pulseGlow), Color.Transparent)),
                                     cornerRadius = CornerRadius(24.dp.toPx()),
                                     topLeft = Offset(-4.dp.toPx(), -2.dp.toPx()),
                                     size = Size(size.width + 8.dp.toPx(), size.height + 8.dp.toPx())
@@ -278,14 +310,7 @@ fun VerdictScreen(
                                     indication = null
                                 ) {
                                     if (!isSubmitting) {
-                                        haptic.heavyImpact()
-                                        isSubmitting = true
-                                        scope.launch {
-                                            delay(500) // dramatic pause
-                                            val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
-                                            val result = playerRepository.applyVerdict(profile, case, liarIds)
-                                            onResult(result.isCorrect, result.pointsChange)
-                                        }
+                                        showConfirmDialog = true
                                     }
                                 },
                             contentAlignment = Alignment.Center
@@ -318,6 +343,8 @@ fun VerdictScreen(
                     }
                 }
             }
+        } else {
+            ErrorState(message = "Affaire introuvable", onBack = null)
         }
     }
 }

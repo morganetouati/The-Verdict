@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.theverdict.app.domain.model.PlayerProfile
@@ -30,6 +31,11 @@ class PreferencesManager(private val context: Context) {
         val THEME_PROGRESS = stringPreferencesKey("theme_progress")
         val COMPLETED_CASE_IDS = stringPreferencesKey("completed_case_ids")
         val HAS_SEEN_TUTORIAL = booleanPreferencesKey("has_seen_tutorial")
+        val WIN_STREAK = intPreferencesKey("win_streak")
+        val BEST_WIN_STREAK = intPreferencesKey("best_win_streak")
+        val STREAK_DAYS = intPreferencesKey("streak_days")
+        val LAST_PLAYED_EPOCH_DAY = longPreferencesKey("last_played_epoch_day")
+        val TOTAL_XP = longPreferencesKey("total_xp")
     }
 
     val playerProfile: Flow<PlayerProfile> = context.dataStore.data.map { prefs ->
@@ -43,7 +49,12 @@ class PreferencesManager(private val context: Context) {
             currentThemeIndex = prefs[Keys.CURRENT_THEME_INDEX] ?: 0,
             currentCaseIndex = prefs[Keys.CURRENT_CASE_INDEX] ?: 0,
             themeProgress = deserializeIntMap(prefs[Keys.THEME_PROGRESS]),
-            completedCaseIds = deserializeIntSet(prefs[Keys.COMPLETED_CASE_IDS])
+            completedCaseIds = deserializeIntSet(prefs[Keys.COMPLETED_CASE_IDS]),
+            winStreak = prefs[Keys.WIN_STREAK] ?: 0,
+            bestWinStreak = prefs[Keys.BEST_WIN_STREAK] ?: 0,
+            streakDays = prefs[Keys.STREAK_DAYS] ?: 0,
+            lastPlayedEpochDay = prefs[Keys.LAST_PLAYED_EPOCH_DAY] ?: -1L,
+            totalXP = prefs[Keys.TOTAL_XP] ?: 0L
         )
     }
 
@@ -59,6 +70,11 @@ class PreferencesManager(private val context: Context) {
             prefs[Keys.CURRENT_CASE_INDEX] = profile.currentCaseIndex
             prefs[Keys.THEME_PROGRESS] = Json.encodeToString(profile.themeProgress)
             prefs[Keys.COMPLETED_CASE_IDS] = Json.encodeToString(profile.completedCaseIds)
+            prefs[Keys.WIN_STREAK] = profile.winStreak
+            prefs[Keys.BEST_WIN_STREAK] = profile.bestWinStreak
+            prefs[Keys.STREAK_DAYS] = profile.streakDays
+            prefs[Keys.LAST_PLAYED_EPOCH_DAY] = profile.lastPlayedEpochDay
+            prefs[Keys.TOTAL_XP] = profile.totalXP
         }
     }
 

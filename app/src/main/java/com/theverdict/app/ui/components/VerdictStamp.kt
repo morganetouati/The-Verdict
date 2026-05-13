@@ -24,10 +24,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.theverdict.app.ui.theme.LocalDimensions
 import com.theverdict.app.ui.theme.VerdictCorrect
 import com.theverdict.app.ui.theme.VerdictWrong
 
@@ -52,9 +55,13 @@ fun VerdictStamp(
 
     val text = if (isCorrect) "BON\nVERDICT" else "MAUVAIS\nVERDICT"
     val color = if (isCorrect) VerdictCorrect else VerdictWrong
+    val dim = LocalDimensions.current
+    val stampFontSize = (dim.titleSize.value * 1.25f).sp
 
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .semantics { contentDescription = if (isCorrect) "Bon verdict" else "Mauvais verdict" },
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -90,7 +97,7 @@ fun VerdictStamp(
             Text(
                 text = text,
                 style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = 42.sp,
+                    fontSize = stampFontSize,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 4.sp
                 ),

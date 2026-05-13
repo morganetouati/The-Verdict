@@ -6,15 +6,20 @@ enum class Rank(
     val maxReputation: Int,
     val emoji: String
 ) {
-    DEBUTANT("Débutant", 0, 20, "📖"),
-    JUGE("Juge", 21, 40, "⚖️"),
-    BON_JUGE("Bon Juge", 41, 60, "🏛️"),
-    EXPERT("Expert", 61, 80, "🎯"),
-    LEGENDE("Légende", 81, 100, "👑");
+    OBSERVATEUR("Observateur",  0,  9,  "👁"),
+    ENQUETEUR("Enquêteur",     10, 19,  "🔎"),
+    INSPECTEUR("Inspecteur",   20, 29,  "🕵️"),
+    DETECTIVE("Détective",     30, 44,  "🧩"),
+    COMMISSAIRE("Commissaire", 45, 59,  "⚖️"),
+    PROFILEUR("Profileur",     60, 69,  "🧠"),
+    MENTALISTE("Mentaliste",   70, 79,  "🌀"),
+    ORACLE("Oracle",           80, 89,  "🔮"),
+    INFILTRE("Infiltré",       90, 98,  "🕶️"),
+    LEGENDE("Légende Absolue", 99, 100, "👑");
 
     companion object {
         fun fromReputation(reputation: Int): Rank {
-            return entries.lastOrNull { reputation >= it.minReputation } ?: DEBUTANT
+            return entries.lastOrNull { reputation >= it.minReputation } ?: OBSERVATEUR
         }
     }
 }

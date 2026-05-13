@@ -1,18 +1,25 @@
 package com.theverdict.app.ui.screens.result
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -59,6 +67,8 @@ fun ResultScreen(
     caseIndex: Int,
     isCorrect: Boolean,
     pointsChange: Int,
+    streakBonus: Int = 0,
+    winStreak: Int = 0,
     onNextCase: (themeIndex: Int, caseIndex: Int) -> Unit,
     onGameOver: () -> Unit,
     onVictory: () -> Unit,
@@ -73,8 +83,9 @@ fun ResultScreen(
 
     // Screen shake effect on stamp impact
     val shakeX = remember { Animatable(0f) }
+    var showCombo by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        delay(400) // Wait for stamp to land
+        delay(400)
         haptic.heavyImpact()
         if (isCorrect) haptic.successPulse() else haptic.errorBuzz()
         shakeX.animateTo(8f, tween(40))
@@ -82,6 +93,10 @@ fun ResultScreen(
         shakeX.animateTo(4f, tween(40))
         shakeX.animateTo(-2f, tween(40))
         shakeX.animateTo(0f, tween(40))
+        if (streakBonus > 0) {
+            delay(200)
+            showCombo = true
+        }
     }
 
     // Animated counter for points
@@ -101,10 +116,11 @@ fun ResultScreen(
             .graphicsLayer { translationX = shakeX.value }
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
-            .padding(dim.paddingLarge),
+            .padding(dim.paddingLarge)
+            .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(dim.topSpacing))
@@ -120,7 +136,45 @@ fun ResultScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // Points change (animated counter)
+        // Combo / streak banner
+        AnimatedVisibility(
+            visible = showCombo && streakBonus > 0,
+            enter = scaleIn(spring(dampingRatio = 0.5f)) + fadeIn()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        Brush.horizontalGradient(listOf(Color(0xFF1A0D00), ComboFire.copy(alpha = 0.25f), Color(0xFF1A0D00)))
+                    )
+                    .border(1.dp, ComboFire.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🔥", style = MaterialTheme.typography.titleLarge)
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "COMBO ×$winStreak",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = ComboFire
+                        )
+                        Text(
+                            text = "+$streakBonus pts bonus de série",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ComboGold
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
         Text(
             text = if (animatedPoints >= 0) "+$animatedPoints" else "$animatedPoints",
             style = MaterialTheme.typography.displayMedium.copy(

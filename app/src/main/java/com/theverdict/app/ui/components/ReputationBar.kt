@@ -29,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.domain.model.Rank
@@ -65,11 +67,16 @@ fun ReputationBar(
     )
 
     val rankColor = when (rank) {
-        Rank.DEBUTANT -> RankDebutant
-        Rank.JUGE -> RankJuge
-        Rank.BON_JUGE -> RankBonJuge
-        Rank.EXPERT -> RankExpert
-        Rank.LEGENDE -> RankLegende
+        Rank.OBSERVATEUR  -> RankObservateur
+        Rank.ENQUETEUR    -> RankEnqueteur
+        Rank.INSPECTEUR   -> RankInspecteur
+        Rank.DETECTIVE    -> RankDetective
+        Rank.COMMISSAIRE  -> RankCommissaire
+        Rank.PROFILEUR    -> RankProfileur
+        Rank.MENTALISTE   -> RankMentaliste
+        Rank.ORACLE       -> RankOracle
+        Rank.INFILTRE     -> RankInfiltre
+        Rank.LEGENDE      -> RankLegende
     }
 
     // Golden gradient for bar, tinted by rank
@@ -77,7 +84,7 @@ fun ReputationBar(
         listOf(GoldDark, rankColor, GoldPrimary, GoldLight)
     )
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.semantics { contentDescription = "Réputation : $reputation sur 100, rang ${rank.displayName}" }) {
         if (showLabel) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -114,16 +121,18 @@ fun ReputationBar(
                     .background(barColor)
                     .drawWithContent {
                         drawContent()
-                        // Animated shine highlight
-                        val shineW = size.width * 0.25f
-                        val shineX = shimmerX * size.width
-                        drawRect(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.35f), Color.Transparent),
-                                startX = shineX - shineW,
-                                endX = shineX + shineW
+                        // Animated shine highlight — only when bar is visible
+                        if (animatedValue > 0.02f) {
+                            val shineW = size.width * 0.25f
+                            val shineX = shimmerX * size.width
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.35f), Color.Transparent),
+                                    startX = shineX - shineW,
+                                    endX = shineX + shineW
+                                )
                             )
-                        )
+                        }
                     }
             )
         }

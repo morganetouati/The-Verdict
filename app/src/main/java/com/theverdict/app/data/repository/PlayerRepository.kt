@@ -9,6 +9,7 @@ import com.theverdict.app.domain.model.Rank
 import com.theverdict.app.domain.model.VerdictResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
 
 class PlayerRepository(private val prefs: PreferencesManager) {
 
@@ -23,10 +24,35 @@ class PlayerRepository(private val prefs: PreferencesManager) {
         isReplay: Boolean = false
     ): VerdictResult {
         val isCorrect = checkAnswer(case, selectedLiarIds)
-        val pointsChange = if (isReplay) 0 else calculatePoints(case.difficulte, isCorrect)
+        val basePoints = if (isReplay) 0 else calculatePoints(case.difficulte, isCorrect)
+
+        // Win streak: increment on correct, reset on wrong
+        val newWinStreak = if (!isReplay) {
+            if (isCorrect) currentProfile.winStreak + 1 else 0
+        } else currentProfile.winStreak
+
+        // Combo bonus points (only on correct, non-replay)
+        val streakBonus = if (!isReplay && isCorrect) {
+            when {
+                newWinStreak >= 10 -> 6
+                newWinStreak >= 5  -> 4
+                newWinStreak >= 3  -> 2
+                else               -> 0
+            }
+        } else 0
+
+        val pointsChange = basePoints + streakBonus
         val newReputation = (currentProfile.reputation + pointsChange).coerceIn(0, 100)
         val oldRank = currentProfile.rank
         val newRank = Rank.fromReputation(newReputation)
+
+        // Daily streak tracking
+        val todayEpochDay = LocalDate.now().toEpochDay()
+        val (newStreakDays, newLastPlayed) = when (currentProfile.lastPlayedEpochDay) {
+            todayEpochDay       -> Pair(currentProfile.streakDays, todayEpochDay)
+            todayEpochDay - 1L  -> Pair(currentProfile.streakDays + 1, todayEpochDay)
+            else                -> Pair(1, todayEpochDay)
+        }
 
         if (!isReplay) {
             val newThemeProgress = currentProfile.themeProgress.toMutableMap()
@@ -34,13 +60,20 @@ class PlayerRepository(private val prefs: PreferencesManager) {
             val currentCount = newThemeProgress[themeIndex] ?: 0
             newThemeProgress[themeIndex] = currentCount + 1
 
+            val xpGained = (basePoints + streakBonus).coerceAtLeast(0).toLong()
+
             val updatedProfile = currentProfile.copy(
                 reputation = newReputation,
                 casesPlayed = currentProfile.casesPlayed + 1,
                 correctVerdicts = currentProfile.correctVerdicts + if (isCorrect) 1 else 0,
                 wrongVerdicts = currentProfile.wrongVerdicts + if (!isCorrect) 1 else 0,
                 themeProgress = newThemeProgress,
-                completedCaseIds = currentProfile.completedCaseIds + case.id
+                completedCaseIds = currentProfile.completedCaseIds + case.id,
+                winStreak = newWinStreak,
+                bestWinStreak = maxOf(currentProfile.bestWinStreak, newWinStreak),
+                streakDays = newStreakDays,
+                lastPlayedEpochDay = newLastPlayed,
+                totalXP = currentProfile.totalXP + xpGained
             )
             prefs.updateProfile(updatedProfile)
         }
@@ -50,7 +83,9 @@ class PlayerRepository(private val prefs: PreferencesManager) {
             pointsChange = pointsChange,
             newReputation = newReputation,
             oldRank = oldRank,
-            newRank = newRank
+            newRank = newRank,
+            streakBonus = streakBonus,
+            newWinStreak = newWinStreak
         )
     }
 
@@ -95,7 +130,6 @@ class PlayerRepository(private val prefs: PreferencesManager) {
 
     suspend fun advanceToNextCase(profile: PlayerProfile): PlayerProfile {
         val themes = CaseTheme.entries
-        val currentTheme = themes[profile.currentThemeIndex]
         val nextCaseIndex = profile.currentCaseIndex + 1
 
         val updatedProfile = if (nextCaseIndex >= 10) {

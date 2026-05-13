@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -62,6 +63,7 @@ fun GameOverScreen(
                     colors = listOf(DarkBackground, Color(0xFF1A0A0A), Color(0xFF120808), DarkBackground)
                 )
             )
+            .safeDrawingPadding()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -84,8 +86,8 @@ fun GameOverScreen(
             Canvas(modifier = Modifier.size(64.dp)) {
                 val w = size.width
                 val h = size.height
-                val red = Color(0xFFE53935)
-                val redL = Color(0xFFEF5350)
+                val red = VerdictWrong
+                val redL = VerdictWrongLight
                 val sw = w * 0.06f
                 // Gavel handle
                 drawLine(red, Offset(w * 0.25f, h * 0.75f), Offset(w * 0.65f, h * 0.35f), sw, StrokeCap.Round)

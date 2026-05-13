@@ -8,5 +8,7 @@ data class VerdictResult(
     val newRank: Rank,
     val wasPromoted: Boolean = newRank.ordinal > oldRank.ordinal,
     val wasDemoted: Boolean = newRank.ordinal < oldRank.ordinal,
-    val isGameOver: Boolean = newReputation <= 0
+    val isGameOver: Boolean = newReputation <= 0,
+    val streakBonus: Int = 0,
+    val newWinStreak: Int = 0
 )

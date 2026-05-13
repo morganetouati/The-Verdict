@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,12 +52,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.theverdict.app.data.repository.CaseRepository
 import com.theverdict.app.domain.model.CaseTheme
 import com.theverdict.app.domain.model.Suspect
 import com.theverdict.app.ui.components.SuspectAvatar
+import com.theverdict.app.ui.components.ErrorState
 import com.theverdict.app.ui.theme.*
 import com.theverdict.app.ui.util.LocalHapticManager
 import kotlinx.coroutines.delay
@@ -82,7 +85,7 @@ fun SuspectsListScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DarkBackground, Color(0xFF111111), DarkSurface, DarkBackground)
+                    colors = listOf(DarkBackground, DarkMid, DarkSurface, DarkBackground)
                 )
             )
     ) {
@@ -140,6 +143,7 @@ fun SuspectsListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .navigationBarsPadding()
                     .padding(24.dp)
                     .drawBehind {
                         drawRoundRect(
@@ -170,6 +174,8 @@ fun SuspectsListScreen(
                     }
                 }
             }
+        } else {
+            ErrorState(message = "Affaire introuvable", onBack = onBack)
         }
     }
 }
@@ -181,6 +187,8 @@ private fun SuspectCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dim = LocalDimensions.current
+    val cardAvatarSize = dim.avatarSizeSmall * 1.4f
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -211,7 +219,7 @@ private fun SuspectCard(
                 SuspectAvatar(
                     config = suspect.avatar,
                     clues = suspect.indices,
-                    size = 80.dp
+                    size = cardAvatarSize
                 )
                 if (isInterrogated) {
                     Box(
@@ -236,7 +244,9 @@ private fun SuspectCard(
                 Text(
                     text = suspect.nom,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = TextWhite
+                    color = TextWhite,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -245,7 +255,7 @@ private fun SuspectCard(
                     color = if (isInterrogated) VerdictCorrect.copy(alpha = 0.7f) else GoldLight.copy(alpha = 0.6f)
                 )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GoldPrimary.copy(alpha = 0.5f))
+            Icon(Icons.Default.ChevronRight, contentDescription = "Voir le détail de ${suspect.nom}", tint = GoldPrimary.copy(alpha = 0.5f))
         }
     }
 }

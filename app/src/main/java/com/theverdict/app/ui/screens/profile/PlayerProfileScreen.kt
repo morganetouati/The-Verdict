@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,7 +35,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import com.theverdict.app.data.repository.PlayerRepository
 import com.theverdict.app.domain.model.PlayerProfile
 import com.theverdict.app.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class JudgeCostume(
@@ -87,6 +92,7 @@ fun PlayerProfileScreen(
 
     var pseudo by remember(profile.pseudo) { mutableStateOf(profile.pseudo) }
     var selectedCostume by remember(profile.costumeIndex) { mutableIntStateOf(profile.costumeIndex) }
+    var savedFeedback by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -96,6 +102,7 @@ fun PlayerProfileScreen(
                     colors = listOf(DarkBackground, DarkSurface, DarkBackground)
                 )
             )
+            .imePadding()
     ) {
         TopAppBar(
             title = { Text("Profil du Juge", color = GoldPrimary) },
@@ -111,7 +118,8 @@ fun PlayerProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(dim.paddingLarge),
+                .padding(dim.paddingLarge)
+                .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Judge avatar preview
@@ -220,6 +228,8 @@ fun PlayerProfileScreen(
                             costumeIndex = selectedCostume
                         )
                         playerRepository.updateProfileDirect(updated)
+                        savedFeedback = true
+                        delay(900)
                         onBack()
                     }
                 },
@@ -231,7 +241,12 @@ fun PlayerProfileScreen(
             ) {
                 Icon(Icons.Default.Check, contentDescription = null, tint = DarkBackground)
                 Spacer(Modifier.width(8.dp))
-                Text("ENREGISTRER", style = MaterialTheme.typography.titleLarge, color = DarkBackground)
+                AnimatedVisibility(visible = savedFeedback, enter = fadeIn(), exit = fadeOut()) {
+                    Text("✓ ENREGISTRÉ !", style = MaterialTheme.typography.titleLarge, color = DarkBackground)
+                }
+                AnimatedVisibility(visible = !savedFeedback, enter = fadeIn(), exit = fadeOut()) {
+                    Text("ENREGISTRER", style = MaterialTheme.typography.titleLarge, color = DarkBackground)
+                }
             }
 
             Spacer(Modifier.height(dim.paddingLarge))

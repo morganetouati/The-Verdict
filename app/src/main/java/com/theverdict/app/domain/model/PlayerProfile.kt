@@ -10,7 +10,13 @@ data class PlayerProfile(
     val currentThemeIndex: Int = 0,
     val currentCaseIndex: Int = 0,
     val themeProgress: Map<Int, Int> = emptyMap(),
-    val completedCaseIds: Set<Int> = emptySet()
+    val completedCaseIds: Set<Int> = emptySet(),
+    // Streak & XP system
+    val winStreak: Int = 0,
+    val bestWinStreak: Int = 0,
+    val streakDays: Int = 0,
+    val lastPlayedEpochDay: Long = -1L,
+    val totalXP: Long = 0L
 ) {
     val rank: Rank get() = Rank.fromReputation(reputation)
 

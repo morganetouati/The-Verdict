@@ -258,19 +258,19 @@ fun NavGraph() {
                 playerRepository = playerRepository,
                 themeIndex = themeIndex,
                 caseIndex = caseIndex,
-                onResult = { isCorrect, pointsChange ->
+                onResult = { isCorrect, pointsChange, streakBonus, winStreak ->
                     val activity = context as? Activity
                     if (activity != null) {
                         adManager.onCaseCompleted(activity) {
                             navController.navigate(
-                                Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange)
+                                Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange, streakBonus, winStreak)
                             ) {
                                 popUpTo(Screen.CasePresentation.createRoute(themeIndex, caseIndex)) { inclusive = true }
                             }
                         }
                     } else {
                         navController.navigate(
-                            Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange)
+                            Screen.Result.createRoute(themeIndex, caseIndex, isCorrect, pointsChange, streakBonus, winStreak)
                         ) {
                             popUpTo(Screen.CasePresentation.createRoute(themeIndex, caseIndex)) { inclusive = true }
                         }
@@ -286,7 +286,9 @@ fun NavGraph() {
                 navArgument("themeIndex") { type = NavType.IntType },
                 navArgument("caseIndex") { type = NavType.IntType },
                 navArgument("isCorrect") { type = NavType.BoolType },
-                navArgument("pointsChange") { type = NavType.IntType }
+                navArgument("pointsChange") { type = NavType.IntType },
+                navArgument("streakBonus") { type = NavType.IntType },
+                navArgument("winStreak") { type = NavType.IntType }
             ),
             enterTransition = { scaleZoomIn() },
             exitTransition = { slideOutToBottom() }
@@ -295,6 +297,8 @@ fun NavGraph() {
             val caseIndex = backStackEntry.arguments?.getInt("caseIndex") ?: 0
             val isCorrect = backStackEntry.arguments?.getBoolean("isCorrect") ?: false
             val pointsChange = backStackEntry.arguments?.getInt("pointsChange") ?: 0
+            val streakBonus = backStackEntry.arguments?.getInt("streakBonus") ?: 0
+            val winStreak = backStackEntry.arguments?.getInt("winStreak") ?: 0
             ResultScreen(
                 caseRepository = caseRepository,
                 playerRepository = playerRepository,
@@ -302,6 +306,8 @@ fun NavGraph() {
                 caseIndex = caseIndex,
                 isCorrect = isCorrect,
                 pointsChange = pointsChange,
+                streakBonus = streakBonus,
+                winStreak = winStreak,
                 onNextCase = { nextTheme, nextCase ->
                     navController.navigate(Screen.CasePresentation.createRoute(nextTheme, nextCase)) {
                         popUpTo(Screen.Menu.route)

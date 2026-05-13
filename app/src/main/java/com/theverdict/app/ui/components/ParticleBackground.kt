@@ -12,36 +12,54 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import com.theverdict.app.ui.theme.GoldPrimary
+import com.theverdict.app.ui.theme.NeonCyan
+import com.theverdict.app.ui.theme.NeonPurple
+import com.theverdict.app.ui.util.isReducedMotion
 import kotlin.random.Random
 
 private data class Particle(
-    val x: Float,       // 0..1 relative
-    val startY: Float,  // 0..1
-    val size: Float,     // dp radius
-    val speed: Float,    // relative speed
-    val alpha: Float,    // 0..1
-    val phase: Float     // 0..1 for horizontal drift
+    val x: Float,
+    val startY: Float,
+    val size: Float,
+    val speed: Float,
+    val alpha: Float,
+    val phase: Float,
+    val colorIndex: Int
 )
 
 @Composable
 fun ParticleBackground(
     modifier: Modifier = Modifier,
-    particleCount: Int = 18,
-    color: Color = Color(0xFFD4A24C)
+    particleCount: Int = 28
 ) {
+    // Neon-noir palette: gold, cyan, purple
+    val palette = remember {
+        listOf(
+            GoldPrimary,
+            NeonCyan,
+            NeonPurple,
+            GoldPrimary, // Gold weighted heavier
+            NeonCyan     // Cyan weighted heavier
+        )
+    }
+
     val particles = remember {
         List(particleCount) {
             Particle(
                 x = Random.nextFloat(),
                 startY = Random.nextFloat(),
-                size = Random.nextFloat() * 2f + 0.8f,
-                speed = Random.nextFloat() * 0.4f + 0.2f,
-                alpha = Random.nextFloat() * 0.25f + 0.05f,
-                phase = Random.nextFloat()
+                size = Random.nextFloat() * 2.2f + 0.6f,
+                speed = Random.nextFloat() * 0.35f + 0.15f,
+                alpha = Random.nextFloat() * 0.22f + 0.04f,
+                phase = Random.nextFloat(),
+                colorIndex = Random.nextInt(5)
             )
         }
     }
+
+    val reducedMotion = isReducedMotion()
 
     val transition = rememberInfiniteTransition(label = "particles")
     val time by transition.animateFloat(
@@ -54,12 +72,11 @@ fun ParticleBackground(
         label = "particleTime"
     )
 
-    // Separate slow oscillation for horizontal drift
     val drift by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing),
+            animation = tween(9000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "drift"
@@ -70,14 +87,21 @@ fun ParticleBackground(
         val h = size.height
 
         particles.forEach { p ->
-            // Particle drifts upward, wraps around
-            val y = ((p.startY + time * p.speed) % 1f) * h
-            // Horizontal sway using sine
-            val sway = kotlin.math.sin((drift + p.phase) * 2 * Math.PI).toFloat() * w * 0.02f
-            val x = p.x * w + sway
-
-            // Pulsing alpha
-            val pulseAlpha = p.alpha * (0.6f + 0.4f * kotlin.math.sin((time + p.phase) * 4 * Math.PI).toFloat())
+            val y: Float
+            val x: Float
+            val pulseAlpha: Float
+            if (reducedMotion) {
+                // Static dots — no animation
+                y = p.startY * h
+                x = p.x * w
+                pulseAlpha = p.alpha
+            } else {
+                y = ((p.startY + time * p.speed) % 1f) * h
+                val sway = kotlin.math.sin((drift + p.phase) * 2 * Math.PI).toFloat() * w * 0.02f
+                x = p.x * w + sway
+                pulseAlpha = p.alpha * (0.5f + 0.5f * kotlin.math.sin((time + p.phase) * 4 * Math.PI).toFloat())
+            }
+            val color = palette[p.colorIndex]
 
             drawCircle(
                 color = color.copy(alpha = pulseAlpha),
