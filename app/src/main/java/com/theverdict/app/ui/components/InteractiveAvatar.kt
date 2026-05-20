@@ -1,5 +1,6 @@
 package com.theverdict.app.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -11,6 +12,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,11 +90,27 @@ fun InteractiveAvatar(
     config: AvatarConfig,
     suspectClues: List<Clue>,
     size: Dp = 300.dp,
+    initialDiscoveredClues: List<Clue> = emptyList(),
+    hintClue: Clue? = null,
     onClueDiscovered: (Clue) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val zoneResults = remember { mutableStateMapOf<AvatarZone, ZoneResult>() }
-    val discoveredClues = remember { mutableStateMapOf<Clue, Boolean>() }
+    val zoneResults = remember {
+        val map = mutableStateMapOf<AvatarZone, ZoneResult>()
+        if (initialDiscoveredClues.isNotEmpty()) {
+            AvatarZone.entries.forEach { zone ->
+                if (zone.relatedClues.any { it in initialDiscoveredClues }) {
+                    map[zone] = ZoneResult.FOUND
+                }
+            }
+        }
+        map
+    }
+    val discoveredClues = remember {
+        val map = mutableStateMapOf<Clue, Boolean>()
+        initialDiscoveredClues.forEach { map[it] = true }
+        map
+    }
     var flashingZone by remember { mutableStateOf<AvatarZone?>(null) }
     val haptic = LocalHapticManager.current
     val scope = rememberCoroutineScope()
@@ -102,14 +122,52 @@ fun InteractiveAvatar(
         }
     }
 
+    // Reveal zone when hint clue is provided
+    LaunchedEffect(hintClue) {
+        if (hintClue == null) return@LaunchedEffect
+        val zone = AvatarZone.entries.find { hintClue in it.relatedClues }
+            ?: return@LaunchedEffect
+        if (zoneResults[zone] == null) {
+            haptic.successPulse()
+            zoneResults[zone] = ZoneResult.FOUND
+            zone.relatedClues.filter { it in suspectClues }.forEach { clue ->
+                if (!discoveredClues.containsKey(clue)) {
+                    discoveredClues[clue] = true
+                    onClueDiscovered(clue)
+                }
+            }
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        // Avatar with clickable zones
+        // Zone pulse animation for unexplored zones
+        val zonePulseInf = rememberInfiniteTransition(label = "zonePulse")
+        val zonePulseAlpha by zonePulseInf.animateFloat(
+            initialValue = 0.07f,
+            targetValue = 0.30f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1100, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "zonePulse"
+        )
+
+        // Zone exploration counter — 3 zones
+        val allZones = AvatarZone.entries
+        val exploredCount = allZones.count { zoneResults.containsKey(it) }
+        Text(
+            text = "🔎 $exploredCount/${allZones.size} zones fouillées",
+            style = MaterialTheme.typography.bodySmall,
+            color = GoldLight.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(6.dp))
+
+        // Avatar with clickable zones — TopStart alignment so offset() starts from (0,0)
         Box(
-            modifier = Modifier.size(size),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.size(size)
         ) {
             // Background avatar
             SuspectAvatar(
@@ -119,9 +177,7 @@ fun InteractiveAvatar(
             )
 
             // Clickable zone overlays — invisible by default, glow on result
-            AvatarZone.entries
-                .filter { it != AvatarZone.ATTITUDE && it.left != it.right }
-                .forEach { zone ->
+            AvatarZone.entries.forEach { zone ->
                     val result = zoneResults[zone]
                     val isFlashing = flashingZone == zone
 
@@ -166,6 +222,14 @@ fun InteractiveAvatar(
                             }
                             .clip(RoundedCornerShape(8.dp))
                             .drawBehind {
+                                // Pulsing gold border on unexplored zones so player sees them
+                                if (result == null) {
+                                    drawRoundRect(
+                                        color = GoldPrimary.copy(alpha = zonePulseAlpha),
+                                        cornerRadius = CornerRadius(8.dp.toPx()),
+                                        style = Stroke(width = 2.dp.toPx())
+                                    )
+                                }
                                 if (glowAlpha > 0f) {
                                     drawRoundRect(
                                         brush = Brush.radialGradient(
@@ -221,142 +285,6 @@ fun InteractiveAvatar(
                 }
         }
 
-        Spacer(Modifier.height(12.dp))
-
-        // ─── ATTITUDE button — bigger, gold, with scan animation ───
-        val attitudeZone = AvatarZone.ATTITUDE
-        val attitudeResult = zoneResults[attitudeZone]
-        val isAttitudeFlashing = flashingZone == attitudeZone
-
-        val inf = rememberInfiniteTransition(label = "attitudeScan")
-        val scanProgress by inf.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(2000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "scanLine"
-        )
-
-        val attitudeInteraction = remember { MutableInteractionSource() }
-        val attitudePressed by attitudeInteraction.collectIsPressedAsState()
-        val attitudeScale by animateFloatAsState(
-            targetValue = if (attitudePressed) 0.95f else 1f,
-            animationSpec = tween(100),
-            label = "attScale"
-        )
-
-        val attitudeBgBrush = when {
-            attitudeResult == ZoneResult.FOUND -> Brush.horizontalGradient(
-                listOf(VerdictCorrect.copy(alpha = 0.2f), VerdictCorrect.copy(alpha = 0.1f))
-            )
-            isAttitudeFlashing -> Brush.horizontalGradient(
-                listOf(VerdictWrong.copy(alpha = 0.3f), VerdictWrong.copy(alpha = 0.15f))
-            )
-            else -> Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight))
-        }
-
-        val attitudeTextColor = when {
-            attitudeResult == ZoneResult.FOUND -> VerdictCorrect
-            isAttitudeFlashing -> VerdictWrong
-            else -> DarkBackground
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .graphicsLayer { scaleX = attitudeScale; scaleY = attitudeScale }
-                .drawBehind {
-                    if (attitudeResult == null) {
-                        drawRoundRect(
-                            brush = Brush.verticalGradient(listOf(Color(0x40D4A24C), Color.Transparent)),
-                            cornerRadius = CornerRadius(16.dp.toPx()),
-                            topLeft = Offset(0f, 3.dp.toPx()),
-                            size = Size(this.size.width, this.size.height + 3.dp.toPx())
-                        )
-                    }
-                }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(attitudeBgBrush)
-                    .then(
-                        if (attitudeResult != null) Modifier.border(
-                            1.dp,
-                            if (attitudeResult == ZoneResult.FOUND) VerdictCorrect.copy(alpha = 0.4f) else VerdictWrong.copy(alpha = 0.3f),
-                            RoundedCornerShape(16.dp)
-                        ) else Modifier
-                    )
-                    .drawBehind {
-                        // Animated scan line (only when not yet clicked)
-                        if (attitudeResult == null) {
-                            val lineY = scanProgress * this.size.height
-                            drawLine(
-                                brush = Brush.horizontalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        Color.White.copy(alpha = 0.25f),
-                                        Color.White.copy(alpha = 0.4f),
-                                        Color.White.copy(alpha = 0.25f),
-                                        Color.Transparent
-                                    )
-                                ),
-                                start = Offset(0f, lineY),
-                                end = Offset(this.size.width, lineY),
-                                strokeWidth = 2.dp.toPx()
-                            )
-                        }
-                    }
-                    .clickable(
-                        interactionSource = attitudeInteraction,
-                        indication = null,
-                        enabled = attitudeResult == null
-                    ) {
-                        val matchingClues = attitudeZone.relatedClues.filter { it in suspectClues }
-                        if (matchingClues.isNotEmpty()) {
-                            haptic.successPulse()
-                            zoneResults[attitudeZone] = ZoneResult.FOUND
-                            matchingClues.forEach { clue ->
-                                discoveredClues[clue] = true
-                                onClueDiscovered(clue)
-                            }
-                        } else {
-                            haptic.errorBuzz()
-                            zoneResults[attitudeZone] = ZoneResult.NOT_FOUND
-                            flashingZone = attitudeZone
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
-                        tint = attitudeTextColor,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        text = when {
-                            attitudeResult == ZoneResult.FOUND -> "ATTITUDE SUSPECTE DÉTECTÉE ✓"
-                            attitudeResult == ZoneResult.NOT_FOUND -> "ATTITUDE NORMALE ✗"
-                            else -> "ANALYSER L'ATTITUDE"
-                        },
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp
-                        ),
-                        color = attitudeTextColor
-                    )
-                }
-            }
-        }
-
         // Discovered clues section
         val found = discoveredClues.keys.toList()
         if (found.isNotEmpty()) {
@@ -376,7 +304,16 @@ fun InteractiveAvatar(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 found.forEach { clue ->
-                    ClueChip(clue = clue)
+                    key(clue) {
+                        var visible by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) { visible = true }
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = fadeIn(tween(250)) + slideInVertically(tween(250)) { it / 2 }
+                        ) {
+                            ClueChip(clue = clue)
+                        }
+                    }
                 }
             }
         }
@@ -389,8 +326,8 @@ private fun DrawScope.drawZoneIcon(zone: AvatarZone, color: Color) {
     val h = size.height
     val sw = w * 0.1f
     when (zone) {
-        AvatarZone.FRONT -> {
-            // Droplet icon
+        AvatarZone.JOUES -> {
+            // Sweat droplet icon
             val path = Path().apply {
                 moveTo(w * 0.5f, h * 0.1f)
                 cubicTo(w * 0.5f, h * 0.1f, w * 0.15f, h * 0.55f, w * 0.15f, h * 0.65f)
@@ -413,12 +350,6 @@ private fun DrawScope.drawZoneIcon(zone: AvatarZone, color: Color) {
             drawPath(eyePath, color, style = Stroke(sw * 0.8f))
             drawCircle(color, w * 0.15f, Offset(w * 0.5f, h * 0.5f))
         }
-        AvatarZone.SOURCILS -> {
-            // Stress/tension lines
-            drawLine(color, Offset(w * 0.15f, h * 0.35f), Offset(w * 0.4f, h * 0.55f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.6f, h * 0.55f), Offset(w * 0.85f, h * 0.35f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.3f, h * 0.2f), Offset(w * 0.7f, h * 0.2f), sw * 0.6f, StrokeCap.Round)
-        }
         AvatarZone.BOUCHE -> {
             // Lips icon
             val lipsPath = Path().apply {
@@ -430,27 +361,5 @@ private fun DrawScope.drawZoneIcon(zone: AvatarZone, color: Color) {
             }
             drawPath(lipsPath, color)
         }
-        AvatarZone.MAINS -> {
-            // Hand/tremble icon  
-            drawLine(color, Offset(w * 0.2f, h * 0.3f), Offset(w * 0.35f, h * 0.7f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.4f, h * 0.2f), Offset(w * 0.5f, h * 0.65f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.6f, h * 0.2f), Offset(w * 0.65f, h * 0.65f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.8f, h * 0.35f), Offset(w * 0.78f, h * 0.65f), sw, StrokeCap.Round)
-            drawArc(color, 0f, 180f, false, Offset(w * 0.2f, h * 0.55f), Size(w * 0.65f, h * 0.35f), style = Stroke(sw))
-        }
-        AvatarZone.BRAS -> {
-            // Crossed arms icon
-            drawLine(color, Offset(w * 0.15f, h * 0.2f), Offset(w * 0.85f, h * 0.8f), sw * 1.2f, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.85f, h * 0.2f), Offset(w * 0.15f, h * 0.8f), sw * 1.2f, StrokeCap.Round)
-        }
-        AvatarZone.CORPS -> {
-            // Body/posture icon
-            drawCircle(color, w * 0.12f, Offset(w * 0.5f, h * 0.15f))
-            drawLine(color, Offset(w * 0.5f, h * 0.28f), Offset(w * 0.5f, h * 0.65f), sw * 1.2f, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.25f, h * 0.4f), Offset(w * 0.75f, h * 0.4f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.5f, h * 0.65f), Offset(w * 0.3f, h * 0.95f), sw, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.5f, h * 0.65f), Offset(w * 0.7f, h * 0.95f), sw, StrokeCap.Round)
-        }
-        AvatarZone.ATTITUDE -> { /* Rendered as button, not zone */ }
     }
 }

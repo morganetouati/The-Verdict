@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,6 +64,11 @@ fun CasePresentationScreen(
     val theme = CaseTheme.entries[themeIndex]
     val case = caseRepository.getCase(theme, caseIndex)
     val dim = LocalDimensions.current
+
+    // Reset suspect/clue state whenever a new case is loaded
+    LaunchedEffect(themeIndex, caseIndex) {
+        caseRepository.clearDiscoveredClues()
+    }
 
     Column(
         modifier = Modifier

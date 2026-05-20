@@ -34,6 +34,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,12 +72,14 @@ import com.theverdict.app.ui.components.RankBadge
 import com.theverdict.app.ui.components.ReputationBar
 import com.theverdict.app.ui.theme.*
 import com.theverdict.app.ui.util.LocalHapticManager
+import java.time.LocalDate
 
 @Composable
 fun MainMenuScreen(
     playerRepository: PlayerRepository,
     caseRepository: CaseRepository,
     onPlay: (themeIndex: Int, caseIndex: Int) -> Unit,
+    onPlayDaily: (themeIndex: Int, caseIndex: Int) -> Unit,
     onReputation: () -> Unit,
     onTutorial: () -> Unit = {},
     onProfile: () -> Unit = {},
@@ -87,6 +90,11 @@ fun MainMenuScreen(
     val haptic = LocalHapticManager.current
     val goldGlow = GoldPrimary.copy(alpha = 0.35f)
     val goldGlowOuter = GoldPrimary.copy(alpha = 0.10f)
+
+    // Daily case state
+    val dailyCaseInfo = remember { caseRepository.getDailyCase() }
+    val todayEpochDay = remember { LocalDate.now().toEpochDay() }
+    val dailyAlreadyDone = profile.lastDailyCaseEpochDay == todayEpochDay
 
     Box(
         modifier = Modifier
@@ -413,6 +421,18 @@ fun MainMenuScreen(
 
             Spacer(Modifier.height(dim.paddingMedium))
 
+            // ─── Affaire du Jour ───
+            DailyCaseCard(
+                caseTitle = dailyCaseInfo?.case?.titre ?: "",
+                isDone = dailyAlreadyDone,
+                isAvailable = dailyCaseInfo != null,
+                onClick = {
+                    dailyCaseInfo?.let { onPlayDaily(it.themeIndex, it.caseIndex) }
+                }
+            )
+
+            Spacer(Modifier.height(dim.paddingMedium))
+
             // ─── Theme selection ───
             Text(
                 text = "Thèmes",
@@ -434,13 +454,19 @@ fun MainMenuScreen(
 
             itemsIndexed(CaseTheme.entries.toList(), key = { index, _ -> index }) { index, theme ->
                 val isUnlocked = playerRepository.isThemeUnlocked(theme, profile)
-                val progress = profile.themeProgress[index] ?: 0
+                val progress = (profile.themeProgress[index] ?: 0).coerceAtMost(10)
+                // For locked themes: progress of the previous theme toward unlock requirement
+                val previousProgress = if (!isUnlocked && index > 0) {
+                    (profile.themeProgress[index - 1] ?: 0).coerceAtMost(theme.casesRequiredToUnlock)
+                } else 0
 
                 ThemeCard(
                     theme = theme,
                     isUnlocked = isUnlocked,
                     progress = progress,
                     isCurrent = index == profile.currentThemeIndex,
+                    previousProgress = previousProgress,
+                    playerReputation = profile.reputation,
                     onClick = {
                         if (isUnlocked) onPlay(index, 0)
                     }
@@ -448,6 +474,100 @@ fun MainMenuScreen(
             }
 
             item { Spacer(Modifier.height(dim.paddingMedium)) }
+        }
+    }
+}
+
+@Composable
+private fun DailyCaseCard(
+    caseTitle: String,
+    isDone: Boolean,
+    isAvailable: Boolean,
+    onClick: () -> Unit
+) {
+    val haptic = LocalHapticManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = tween(100),
+        label = "dailyScale"
+    )
+    val borderColor = when {
+        isDone -> VerdictCorrect.copy(alpha = 0.5f)
+        else   -> GoldPrimary.copy(alpha = 0.6f)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .border(
+                width = 1.5.dp,
+                brush = Brush.horizontalGradient(listOf(borderColor, borderColor.copy(alpha = 0.3f))),
+                shape = RoundedCornerShape(14.dp)
+            )
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                brush = Brush.horizontalGradient(
+                    if (isDone) listOf(DarkCard.copy(alpha = 0.6f), DarkCard.copy(alpha = 0.6f))
+                    else listOf(DarkCard, DarkMid.copy(alpha = 0.9f))
+                )
+            )
+            .clickable(
+                enabled = isAvailable && !isDone,
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                haptic.medium()
+                onClick()
+            }
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "📅",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.graphicsLayer { alpha = if (isDone) 0.5f else 1f }
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "AFFAIRE DU JOUR",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp
+                    ),
+                    color = if (isDone) TextDimmed else GoldPrimary
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = when {
+                        isDone -> "✓ Résolue aujourd'hui"
+                        caseTitle.isNotBlank() -> caseTitle
+                        else -> "Chargement…"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isDone) VerdictCorrect.copy(alpha = 0.7f) else TextGray
+                )
+                if (!isDone) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "🏅 +5 réputation si correct",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = GoldLight.copy(alpha = 0.6f)
+                    )
+                }
+            }
+            if (!isDone) {
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = "Jouer l'affaire du jour",
+                    tint = GoldPrimary.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 }
@@ -519,6 +639,8 @@ private fun ThemeCard(
     isUnlocked: Boolean,
     progress: Int,
     isCurrent: Boolean,
+    previousProgress: Int = 0,
+    playerReputation: Int = 0,
     onClick: () -> Unit
 ) {
     // Pulsing border for current theme
@@ -576,7 +698,7 @@ private fun ThemeCard(
                         color = if (isUnlocked) TextWhite else TextDimmed
                     )
                     Text(
-                        text = if (isUnlocked) "$progress/10 affaires" else "\uD83D\uDD12 ${theme.casesRequiredToUnlock} affaires + ${theme.reputationRequiredToUnlock} rép.",
+                        text = if (isUnlocked) "$progress/10 affaires" else "\uD83D\uDD12 ${theme.casesRequiredToUnlock} affaires · ${theme.reputationRequiredToUnlock} rép.",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isUnlocked) TextGray else TextDimmed
                     )
@@ -597,13 +719,68 @@ private fun ThemeCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(fraction = progress / 10f)
+                            .fillMaxWidth(fraction = (progress / 10f).coerceIn(0f, 1f))
                             .height(4.dp)
                             .clip(RoundedCornerShape(2.dp))
                             .background(
                                 Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight))
                             )
                     )
+                }
+            } else {
+                // Progress toward unlock: cases in previous theme
+                val caseFraction = (previousProgress.toFloat() / theme.casesRequiredToUnlock).coerceIn(0f, 1f)
+                val repFraction = (playerReputation.toFloat() / theme.reputationRequiredToUnlock).coerceIn(0f, 1f)
+                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
+                    // Cases progress
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Affaires : $previousProgress/${theme.casesRequiredToUnlock}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextDimmed,
+                            modifier = Modifier.width(120.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(DarkSurfaceVariant)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(caseFraction)
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.5f), GoldPrimary.copy(alpha = 0.4f))))
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    // Reputation progress
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Réputation : $playerReputation/${theme.reputationRequiredToUnlock}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextDimmed,
+                            modifier = Modifier.width(120.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(DarkSurfaceVariant)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(repFraction)
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.5f), GoldPrimary.copy(alpha = 0.4f))))
+                            )
+                        }
+                    }
                 }
             }
         }

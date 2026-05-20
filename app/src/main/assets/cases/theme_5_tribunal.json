@@ -7,12 +7,79 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Arnaud (accusé)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je n'ai jamais levé la main sur cette personne.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "Géraldine (témoin)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai tout vu de ma fenêtre, il l'a frappé au visage.", "indices": ["DETAIL_SUSPECT", "SE_CONTREDIT"]},
-      {"id": 3, "nom": "Lucas (victime)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Il m'a agressé sans raison, j'ai des bleus comme preuve.", "indices": ["TROP_CALME"]},
-      {"id": 4, "nom": "Karine (amie du témoin)", "avatar": {"skinTone": 2, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Géraldine m'a raconté la scène le jour même.", "indices": ["CONFIANT"]}
+      {
+        "id": 1,
+        "nom": "Arnaud (accusé)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 0
+        },
+        "phrase": "Je n'ai jamais levé la main sur cette personne.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Géraldine (témoin)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 2,
+          "hairColor": 3,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 4
+        },
+        "phrase": "J'ai tout vu de ma fenêtre, il l'a frappé au visage.",
+        "indices": [
+          "DETAIL_SUSPECT",
+          "SE_CONTREDIT"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Lucas (victime)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 1,
+          "hairColor": 1,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 3
+        },
+        "phrase": "Il m'a agressé sans raison, j'ai des bleus comme preuve.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      },
+      {
+        "id": 4,
+        "nom": "Karine (amie du témoin)",
+        "avatar": {
+          "skinTone": 2,
+          "hairStyle": 3,
+          "hairColor": 2,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 5
+        },
+        "phrase": "Géraldine m'a raconté la scène le jour même.",
+        "indices": [
+          "CONFIANT"
+        ]
+      }
     ],
-    "coupableIds": [2]
+    "coupableIds": [
+      2
+    ]
   },
   {
     "id": 42,
@@ -22,11 +89,63 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Catherine (fille)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "Papa voulait me laisser la maison, il me l'a dit souvent.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "Jean-Paul (fils)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Le notaire peut confirmer, je n'ai jamais vu ce nouveau testament.", "indices": ["NERVEUX", "TRANSPIRE", "HISTOIRE_FLOUE"]},
-      {"id": 3, "nom": "Marie-Claire (bru)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 4, "accessory": 0, "expression": 0}, "phrase": "Les affaires de famille ne me concernent pas.", "indices": ["TROP_CALME"]}
+      {
+        "id": 1,
+        "nom": "Catherine (fille)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 3,
+          "hairColor": 2,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 5
+        },
+        "phrase": "Papa voulait me laisser la maison, il me l'a dit souvent.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Jean-Paul (fils)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "Le notaire peut confirmer, je n'ai jamais vu ce nouveau testament.",
+        "indices": [
+          "NERVEUX",
+          "TRANSPIRE",
+          "HISTOIRE_FLOUE"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Marie-Claire (bru)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 2,
+          "hairColor": 4,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 3
+        },
+        "phrase": "Les affaires de famille ne me concernent pas.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      }
     ],
-    "coupableIds": [2]
+    "coupableIds": [
+      2
+    ]
   },
   {
     "id": 43,
@@ -36,12 +155,80 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Maître Dupont (avocat A)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Mon client et moi avons relu le contrat, cette clause n'y était pas.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "Maître Leroux (avocat B)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Toutes les clauses ont été discutées en réunion plénière.", "indices": ["PARLE_VITE", "EVITE_REGARD", "MAINS_TREMBLENT"]},
-      {"id": 3, "nom": "Diane (secrétaire)", "avatar": {"skinTone": 2, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai tapé ce qu'on m'a dicté, je ne rédige pas les clauses.", "indices": ["CONFIANT"]},
-      {"id": 4, "nom": "M. Garcia (PDG)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai fait confiance à mon avocat pour la rédaction.", "indices": ["TROP_CALME"]}
+      {
+        "id": 1,
+        "nom": "Maître Dupont (avocat A)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 1,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 1
+        },
+        "phrase": "Mon client et moi avons relu le contrat, cette clause n'y était pas.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Maître Leroux (avocat B)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 1,
+          "hairColor": 0,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 1
+        },
+        "phrase": "Toutes les clauses ont été discutées en réunion plénière.",
+        "indices": [
+          "PARLE_VITE",
+          "EVITE_REGARD",
+          "MAINS_TREMBLENT"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Diane (secrétaire)",
+        "avatar": {
+          "skinTone": 2,
+          "hairStyle": 2,
+          "hairColor": 3,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 5
+        },
+        "phrase": "J'ai tapé ce qu'on m'a dicté, je ne rédige pas les clauses.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 4,
+        "nom": "M. Garcia (PDG)",
+        "avatar": {
+          "skinTone": 3,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 3
+        },
+        "phrase": "J'ai fait confiance à mon avocat pour la rédaction.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      }
     ],
-    "coupableIds": [2]
+    "coupableIds": [
+      2
+    ]
   },
   {
     "id": 44,
@@ -51,11 +238,62 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Laura (mère)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "Je m'occupe de mon fils tous les jours, il est heureux avec moi.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "David (père)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "L'enfant veut vivre avec moi. Laura est tout le temps au travail !", "indices": ["VOIX_CHANGE", "SE_CONTREDIT"]},
-      {"id": 3, "nom": "Institutrice (Mme Roy)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "L'enfant semble perturbé depuis la séparation, mais il parle souvent de sa mère.", "indices": ["TROP_CALME"]}
+      {
+        "id": 1,
+        "nom": "Laura (mère)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 2,
+          "hairColor": 3,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 0
+        },
+        "phrase": "Je m'occupe de mon fils tous les jours, il est heureux avec moi.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "David (père)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "L'enfant veut vivre avec moi. Laura est tout le temps au travail !",
+        "indices": [
+          "VOIX_CHANGE",
+          "SE_CONTREDIT"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Institutrice (Mme Roy)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 3,
+          "hairColor": 2,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 1
+        },
+        "phrase": "L'enfant semble perturbé depuis la séparation, mais il parle souvent de sa mère.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      }
     ],
-    "coupableIds": [2]
+    "coupableIds": [
+      2
+    ]
   },
   {
     "id": 45,
@@ -65,12 +303,80 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "M. Bertrand (témoin)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "J'ai dit la vérité et rien que la vérité, personne ne m'a payé !", "indices": ["TRANSPIRE", "REPOND_VITE", "NERVEUX"]},
-      {"id": 2, "nom": "Mme Chen (accusée)", "avatar": {"skinTone": 4, "hairStyle": 2, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je n'ai aucune raison de corrompre qui que ce soit.", "indices": ["CONFIANT"]},
-      {"id": 3, "nom": "M. Vidal (avocat défense)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "Mon travail est de défendre ma cliente, pas de corrompre.", "indices": ["TROP_CALME"]},
-      {"id": 4, "nom": "Mme Laurent (greffière)", "avatar": {"skinTone": 0, "hairStyle": 3, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "J'ai noté un changement dans sa déposition entre les deux audiences.", "indices": ["CONFIANT"]}
+      {
+        "id": 1,
+        "nom": "M. Bertrand (témoin)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 0
+        },
+        "phrase": "J'ai dit la vérité et rien que la vérité, personne ne m'a payé !",
+        "indices": [
+          "TRANSPIRE",
+          "REPOND_VITE",
+          "NERVEUX"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Mme Chen (accusée)",
+        "avatar": {
+          "skinTone": 4,
+          "hairStyle": 2,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 1
+        },
+        "phrase": "Je n'ai aucune raison de corrompre qui que ce soit.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "M. Vidal (avocat défense)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 1,
+          "hairColor": 1,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 3
+        },
+        "phrase": "Mon travail est de défendre ma cliente, pas de corrompre.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      },
+      {
+        "id": 4,
+        "nom": "Mme Laurent (greffière)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 3,
+          "hairColor": 3,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 0
+        },
+        "phrase": "J'ai noté un changement dans sa déposition entre les deux audiences.",
+        "indices": [
+          "CONFIANT"
+        ]
+      }
     ],
-    "coupableIds": [1]
+    "coupableIds": [
+      1
+    ]
   },
   {
     "id": 46,
@@ -80,11 +386,63 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Greffier (Paul)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "La pièce était là quand j'ai fermé hier soir à 19h.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "Avocat (Me Blanc)", "avatar": {"skinTone": 1, "hairStyle": 1, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "J'ai consulté le dossier hier matin, tout était en ordre.", "indices": ["SOURIT_TROP", "HISTOIRE_FLOUE", "EVITE_REGARD"]},
-      {"id": 3, "nom": "Agent de sécurité (Victor)", "avatar": {"skinTone": 3, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Personne n'est entré après les heures de fermeture.", "indices": ["TROP_CALME"]}
+      {
+        "id": 1,
+        "nom": "Greffier (Paul)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 1,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "La pièce était là quand j'ai fermé hier soir à 19h.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Avocat (Me Blanc)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 1,
+          "hairColor": 0,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "J'ai consulté le dossier hier matin, tout était en ordre.",
+        "indices": [
+          "SOURIT_TROP",
+          "HISTOIRE_FLOUE",
+          "EVITE_REGARD"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Agent de sécurité (Victor)",
+        "avatar": {
+          "skinTone": 3,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 5
+        },
+        "phrase": "Personne n'est entré après les heures de fermeture.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      }
     ],
-    "coupableIds": [2]
+    "coupableIds": [
+      2
+    ]
   },
   {
     "id": 47,
@@ -94,11 +452,63 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Dr. Martin (expert)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je ne connais aucune des parties impliquées.", "indices": ["REGARDE_AILLEURS", "MAINS_TREMBLENT", "SE_CONTREDIT"]},
-      {"id": 2, "nom": "M. Rousseau (demandeur)", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je n'ai jamais rencontré cet expert avant l'audience.", "indices": ["TROP_CALME"]},
-      {"id": 3, "nom": "Mme Petit (défendeur)", "avatar": {"skinTone": 1, "hairStyle": 2, "hairColor": 2, "accessory": 0, "expression": 0}, "phrase": "L'expert est impartial, ses conclusions sont claires.", "indices": ["CONFIANT"]}
+      {
+        "id": 1,
+        "nom": "Dr. Martin (expert)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 0
+        },
+        "phrase": "Je ne connais aucune des parties impliquées.",
+        "indices": [
+          "REGARDE_AILLEURS",
+          "MAINS_TREMBLENT",
+          "SE_CONTREDIT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "M. Rousseau (demandeur)",
+        "avatar": {
+          "skinTone": 2,
+          "hairStyle": 1,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 1
+        },
+        "phrase": "Je n'ai jamais rencontré cet expert avant l'audience.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Mme Petit (défendeur)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 2,
+          "hairColor": 2,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 4
+        },
+        "phrase": "L'expert est impartial, ses conclusions sont claires.",
+        "indices": [
+          "CONFIANT"
+        ]
+      }
     ],
-    "coupableIds": [1]
+    "coupableIds": [
+      1
+    ]
   },
   {
     "id": 48,
@@ -108,11 +518,63 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Me Pascal (défense)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 1, "accessory": 1, "expression": 0}, "phrase": "La perquisition a été menée sans mandat valide, c'est la loi.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "Commissaire Muller", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Nous avons suivi la procédure à la lettre, vérifiez le dossier.", "indices": ["TROP_CALME"]},
-      {"id": 3, "nom": "Procureur Lemoine", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Le mandat était en règle, je l'ai signé moi-même.", "indices": ["TRANSPIRE", "HESITE", "DETAIL_SUSPECT"]}
+      {
+        "id": 1,
+        "nom": "Me Pascal (défense)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 1,
+          "hairColor": 1,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "La perquisition a été menée sans mandat valide, c'est la loi.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Commissaire Muller",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "Nous avons suivi la procédure à la lettre, vérifiez le dossier.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Procureur Lemoine",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 5
+        },
+        "phrase": "Le mandat était en règle, je l'ai signé moi-même.",
+        "indices": [
+          "TRANSPIRE",
+          "HESITE",
+          "DETAIL_SUSPECT"
+        ]
+      }
     ],
-    "coupableIds": [3]
+    "coupableIds": [
+      3
+    ]
   },
   {
     "id": 49,
@@ -122,11 +584,63 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "M. Faure (plaignant)", "avatar": {"skinTone": 2, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "J'ai souffert moralement et physiquement, ces montants sont justifiés.", "indices": ["VOIX_CHANGE", "HISTOIRE_FLOUE", "SOURIT_TROP"]},
-      {"id": 2, "nom": "Dr. Simon (médecin)", "avatar": {"skinTone": 0, "hairStyle": 1, "hairColor": 2, "accessory": 1, "expression": 0}, "phrase": "Le certificat médical reflète ce que j'ai constaté.", "indices": ["CONFIANT"]},
-      {"id": 3, "nom": "Me Chardin (avocat plaignant)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Les montants sont conformes à la jurisprudence.", "indices": ["TROP_CALME"]}
+      {
+        "id": 1,
+        "nom": "M. Faure (plaignant)",
+        "avatar": {
+          "skinTone": 2,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 0
+        },
+        "phrase": "J'ai souffert moralement et physiquement, ces montants sont justifiés.",
+        "indices": [
+          "VOIX_CHANGE",
+          "HISTOIRE_FLOUE",
+          "SOURIT_TROP"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Dr. Simon (médecin)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 1,
+          "hairColor": 2,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 3
+        },
+        "phrase": "Le certificat médical reflète ce que j'ai constaté.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Me Chardin (avocat plaignant)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 2
+        },
+        "phrase": "Les montants sont conformes à la jurisprudence.",
+        "indices": [
+          "TROP_CALME"
+        ]
+      }
     ],
-    "coupableIds": [1]
+    "coupableIds": [
+      1
+    ]
   },
   {
     "id": 50,
@@ -136,11 +650,80 @@
     "difficulte": 3,
     "type": "NORMAL",
     "suspects": [
-      {"id": 1, "nom": "Juré n°3 (Hélène)", "avatar": {"skinTone": 0, "hairStyle": 2, "hairColor": 3, "accessory": 0, "expression": 0}, "phrase": "On m'a menacée par téléphone, j'ai eu très peur.", "indices": ["CONFIANT"]},
-      {"id": 2, "nom": "Me Dubois (défense)", "avatar": {"skinTone": 1, "hairStyle": 0, "hairColor": 0, "accessory": 1, "expression": 0}, "phrase": "Je n'ai aucun contact avec les jurés, c'est interdit.", "indices": ["NERVEUX", "BRAS_CROISES"]},
-      {"id": 3, "nom": "L'accusé (Roland)", "avatar": {"skinTone": 0, "hairStyle": 0, "hairColor": 1, "accessory": 0, "expression": 0}, "phrase": "Je suis en détention, comment aurais-je pu appeler quelqu'un ?", "indices": ["TROP_CALME"]},
-      {"id": 4, "nom": "Famille de l'accusé (Serge)", "avatar": {"skinTone": 2, "hairStyle": 1, "hairColor": 0, "accessory": 0, "expression": 0}, "phrase": "Je ne connais même pas le numéro de la jurée.", "indices": ["PARLE_VITE", "TRANSPIRE", "EVITE_REGARD"]}
+      {
+        "id": 1,
+        "nom": "Juré n°3 (Hélène)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 2,
+          "hairColor": 3,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 1,
+          "eyeColor": 0
+        },
+        "phrase": "On m'a menacée par téléphone, j'ai eu très peur.",
+        "indices": [
+          "CONFIANT"
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Me Dubois (défense)",
+        "avatar": {
+          "skinTone": 1,
+          "hairStyle": 0,
+          "hairColor": 0,
+          "accessory": 1,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 4
+        },
+        "phrase": "Je n'ai aucun contact avec les jurés, c'est interdit.",
+        "indices": [
+          "NERVEUX",
+          "BRAS_CROISES"
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "L'accusé (Roland)",
+        "avatar": {
+          "skinTone": 0,
+          "hairStyle": 0,
+          "hairColor": 1,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 0
+        },
+        "phrase": "Je suis en détention, comment aurais-je pu appeler quelqu'un ?",
+        "indices": [
+          "TROP_CALME"
+        ]
+      },
+      {
+        "id": 4,
+        "nom": "Famille de l'accusé (Serge)",
+        "avatar": {
+          "skinTone": 2,
+          "hairStyle": 1,
+          "hairColor": 0,
+          "accessory": 0,
+          "expression": 0,
+          "gender": 0,
+          "eyeColor": 0
+        },
+        "phrase": "Je ne connais même pas le numéro de la jurée.",
+        "indices": [
+          "PARLE_VITE",
+          "TRANSPIRE",
+          "EVITE_REGARD"
+        ]
+      }
     ],
-    "coupableIds": [4]
+    "coupableIds": [
+      4
+    ]
   }
 ]

@@ -16,7 +16,9 @@ data class PlayerProfile(
     val bestWinStreak: Int = 0,
     val streakDays: Int = 0,
     val lastPlayedEpochDay: Long = -1L,
-    val totalXP: Long = 0L
+    val totalXP: Long = 0L,
+    // Daily case
+    val lastDailyCaseEpochDay: Long = -1L
 ) {
     val rank: Rank get() = Rank.fromReputation(reputation)
 

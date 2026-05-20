@@ -144,6 +144,11 @@ fun NavGraph() {
                 playerRepository = playerRepository,
                 caseRepository = caseRepository,
                 onPlay = { themeIndex, caseIndex ->
+                    caseRepository.isDailyMode = false
+                    navController.navigate(Screen.CasePresentation.createRoute(themeIndex, caseIndex))
+                },
+                onPlayDaily = { themeIndex, caseIndex ->
+                    caseRepository.isDailyMode = true
                     navController.navigate(Screen.CasePresentation.createRoute(themeIndex, caseIndex))
                 },
                 onReputation = {
@@ -232,6 +237,7 @@ fun NavGraph() {
             val suspectId = backStackEntry.arguments?.getInt("suspectId") ?: 0
             InterrogationScreen(
                 caseRepository = caseRepository,
+                playerRepository = playerRepository,
                 themeIndex = themeIndex,
                 caseIndex = caseIndex,
                 suspectId = suspectId,
@@ -324,8 +330,14 @@ fun NavGraph() {
                     }
                 },
                 onMenu = {
+                    caseRepository.isDailyMode = false
                     navController.navigate(Screen.Menu.route) {
                         popUpTo(Screen.Menu.route) { inclusive = true }
+                    }
+                },
+                onReplay = {
+                    navController.navigate(Screen.CasePresentation.createRoute(themeIndex, caseIndex)) {
+                        popUpTo(Screen.Menu.route)
                     }
                 }
             )

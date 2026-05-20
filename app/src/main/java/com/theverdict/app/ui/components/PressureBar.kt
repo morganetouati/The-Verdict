@@ -1,6 +1,6 @@
 package com.theverdict.app.ui.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,81 +26,86 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.contentDescription
 import com.theverdict.app.ui.theme.*
 
 @Composable
-fun TimerBar(
-    remainingSeconds: Int,
-    totalSeconds: Int = 90,
+fun PressureBar(
+    pressure: Int,
+    maxPressure: Int = 100,
     modifier: Modifier = Modifier
 ) {
     val fraction by animateFloatAsState(
-        targetValue = remainingSeconds.toFloat() / totalSeconds,
-        animationSpec = tween(300),
-        label = "timer"
+        targetValue = pressure.toFloat() / maxPressure,
+        animationSpec = tween(400),
+        label = "pressure"
     )
 
-    val isCritical = remainingSeconds <= 15
-    val isWarning = remainingSeconds <= 30
+    val isCritical = pressure >= 80
+    val isWarning = pressure in 50..79
 
-    val color = when {
-        isCritical -> TimerCritical
-        isWarning  -> TimerWarning
-        else       -> TimerNormal
+    val barColor = when {
+        isCritical -> PressureCritical
+        isWarning  -> PressureWarning
+        else       -> PressureNormal
+    }
+    val barColorLight = when {
+        isCritical -> PressureCriticalLight
+        isWarning  -> PressureWarningLight
+        else       -> PressureNormalLight
     }
 
-    val colorLight = when {
-        isCritical -> TimerCriticalLight
-        isWarning  -> TimerWarningLight
-        else       -> TimerNormalLight
+    val label = when {
+        isCritical -> "⚠️ Interrogatoire compromis !"
+        isWarning  -> "🧠 Pression élevée"
+        else       -> "🧠 Pression"
     }
 
-    // Pulsing scale when critical (<=15s)
-    val infiniteTransition = rememberInfiniteTransition(label = "timerPulse")
-    val pulseScale by infiniteTransition.animateFloat(
+    // Pulse animation in critical state
+    val inf = rememberInfiniteTransition(label = "pressurePulse")
+    val pulse by inf.animateFloat(
         initialValue = 1f,
         targetValue = if (isCritical) 1.04f else 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(350, easing = FastOutSlowInEasing),
+            animation = tween(500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "timerScale"
+        label = "pulse"
     )
 
     Column(
         modifier = modifier
-            .graphicsLayer { scaleX = pulseScale; scaleY = pulseScale }
-            .semantics { contentDescription = "Temps restant : ${remainingSeconds} secondes" }
+            .semantics { contentDescription = "Pression : $pressure sur $maxPressure" }
+            .graphicsLayer { scaleX = pulse; scaleY = pulse }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (isCritical) "⚠️ Temps restant" else "⏱ Temps restant",
+                text = label,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (isCritical) TimerCritical else TextGray
+                color = barColor
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "${remainingSeconds}s",
+                text = "$pressure / $maxPressure",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = color
+                color = barColor
             )
         }
         Spacer(Modifier.height(4.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (isCritical) 10.dp else 8.dp)
+                .height(8.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .drawBehind {
                     drawRoundRect(
-                        color = color.copy(alpha = if (isCritical) 0.3f else 0.15f),
+                        color = barColor.copy(alpha = 0.15f),
                         size = size.copy(height = size.height + 4.dp.toPx()),
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx())
                     )
@@ -109,10 +115,28 @@ fun TimerBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction)
-                    .height(if (isCritical) 10.dp else 8.dp)
+                    .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Brush.horizontalGradient(listOf(color, colorLight, color)))
+                    .background(Brush.horizontalGradient(listOf(barColor, barColorLight, barColor)))
             )
+        }
+
+        // Critical warning banner
+        if (isCritical) {
+            Spacer(Modifier.height(6.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(PressureCritical.copy(alpha = 0.15f))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "Perte de réputation · Indice perdu · Risque d'erreur",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = PressureCriticalLight
+                )
+            }
         }
     }
 }

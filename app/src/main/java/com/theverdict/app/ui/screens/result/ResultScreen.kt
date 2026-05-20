@@ -72,7 +72,8 @@ fun ResultScreen(
     onNextCase: (themeIndex: Int, caseIndex: Int) -> Unit,
     onGameOver: () -> Unit,
     onVictory: () -> Unit,
-    onMenu: () -> Unit
+    onMenu: () -> Unit,
+    onReplay: (() -> Unit)? = null
 ) {
     val profile by playerRepository.profile.collectAsState(initial = PlayerProfile())
     val scope = rememberCoroutineScope()
@@ -301,22 +302,41 @@ fun ResultScreen(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(dim.buttonHeightSmall)
-                        .clip(RoundedCornerShape(24.dp))
-                        .border(1.dp, GoldDark.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                        .background(DarkSurfaceVariant)
-                        .clickable { onMenu() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "MENU",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = GoldLight
-                    )
-                }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(dim.buttonHeightSmall)
+                            .clip(RoundedCornerShape(24.dp))
+                            .border(1.dp, GoldDark.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                            .background(DarkSurfaceVariant)
+                            .clickable { onMenu() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "MENU",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = GoldLight
+                        )
+                    }
+                    onReplay?.let { replay ->
+                        Spacer(Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(dim.buttonHeightSmall)
+                                .clip(RoundedCornerShape(24.dp))
+                                .border(1.dp, GoldDark.copy(alpha = 0.25f), RoundedCornerShape(24.dp))
+                                .background(DarkSurfaceVariant)
+                                .clickable { replay() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "🔁 REJOUER",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = TextGray
+                            )
+                        }
+                    }
             }
         }
     }

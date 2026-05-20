@@ -63,3 +63,11 @@ val TimerCriticalLight = Color(0xFFFF6D6D)
 val AccentBlue = Color(0xFF3F51B5)
 val AccentPurple = Color(0xFF7E57C2)
 val CardBorder = Color(0xFF252540)
+
+// Pressure bar
+val PressureNormal = Color(0xFF00E5FF)
+val PressureNormalLight = Color(0xFF64FFDA)
+val PressureWarning = Color(0xFFFF9800)
+val PressureWarningLight = Color(0xFFFFB74D)
+val PressureCritical = Color(0xFFFF1744)
+val PressureCriticalLight = Color(0xFFFF6D6D)

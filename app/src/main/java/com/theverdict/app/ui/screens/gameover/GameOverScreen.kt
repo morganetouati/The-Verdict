@@ -18,13 +18,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +59,7 @@ fun GameOverScreen(
     val profile by playerRepository.profile.collectAsState(initial = PlayerProfile())
     val scope = rememberCoroutineScope()
     val redGlow = VerdictWrong.copy(alpha = 0.25f)
+    var showResetConfirmDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -167,10 +173,7 @@ fun GameOverScreen(
                     .clip(RoundedCornerShape(24.dp))
                     .background(Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight)))
                     .clickable(interactionSource = interactionSource, indication = null) {
-                        scope.launch {
-                            playerRepository.resetAll()
-                            onRestart()
-                        }
+                        showResetConfirmDialog = true
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -181,5 +184,28 @@ fun GameOverScreen(
                 )
             }
         }
+    }
+
+    if (showResetConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirmDialog = false },
+            title = { Text("Tout recommencer ?", color = TextWhite) },
+            text = { Text("Votre profil, réputation et progression seront effacés définitivement. Cette action est irréversible.", color = TextGray) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResetConfirmDialog = false
+                        scope.launch {
+                            playerRepository.resetAll()
+                            onRestart()
+                        }
+                    }
+                ) { Text("Oui, recommencer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirmDialog = false }) { Text("Annuler") }
+            },
+            containerColor = DarkCard
+        )
     }
 }

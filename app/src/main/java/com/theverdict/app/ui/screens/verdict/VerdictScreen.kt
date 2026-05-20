@@ -92,6 +92,7 @@ fun VerdictScreen(
 ) {
     val theme = CaseTheme.entries[themeIndex]
     val case = caseRepository.getCase(theme, caseIndex)
+    val isDaily = caseRepository.isDailyMode
     val profile by playerRepository.profile.collectAsState(initial = PlayerProfile())
     val scope = rememberCoroutineScope()
     val selectedIds = remember { mutableStateListOf<Int>() }
@@ -99,6 +100,8 @@ fun VerdictScreen(
     val haptic = LocalHapticManager.current
     var showConfirmDialog by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
+    var showTimeUpDialog by remember { mutableStateOf(false) }
+    var showClueRecap by remember { mutableStateOf(false) }
 
     // Timer
     var remainingSeconds by remember { mutableIntStateOf(90) }
@@ -109,14 +112,12 @@ fun VerdictScreen(
             while (remainingSeconds > 0) {
                 delay(1000)
                 remainingSeconds--
-            }
-            // Auto-submit empty verdict when time expires
-            if (case != null) {
-                scope.launch {
-                    val result = playerRepository.applyVerdict(profile, case, emptyList())
-                    onResult(result.isCorrect, result.pointsChange, result.streakBonus, result.newWinStreak)
+                when (remainingSeconds) {
+                    30 -> haptic.lightTap()
+                    10 -> haptic.heavyImpact()
                 }
             }
+            showTimeUpDialog = true
         }
     }
 
@@ -148,6 +149,25 @@ fun VerdictScreen(
         )
 
         if (case != null) {
+            // Time-up dialog
+            if (showTimeUpDialog) {
+                AlertDialog(
+                    onDismissRequest = {},
+                    title = { Text("⏰ Temps écoulé !", color = TextWhite) },
+                    text = { Text("Votre verdict est soumis sans sélection.", color = TextGray) },
+                    confirmButton = {
+                        Button(onClick = {
+                            showTimeUpDialog = false
+                            scope.launch {
+                                val result = playerRepository.applyVerdict(profile, case, emptyList(), isDailyCase = isDaily)
+                                onResult(result.isCorrect, result.pointsChange, result.streakBonus, result.newWinStreak)
+                            }
+                        }) { Text("OK") }
+                    },
+                    containerColor = DarkCard
+                )
+            }
+
             // Confirmation dialog
             if (showConfirmDialog) {
                 AlertDialog(
@@ -162,7 +182,7 @@ fun VerdictScreen(
                             scope.launch {
                                 delay(500)
                                 val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
-                                val result = playerRepository.applyVerdict(profile, case, liarIds)
+                                val result = playerRepository.applyVerdict(profile, case, liarIds, isDailyCase = isDaily)
                                 onResult(result.isCorrect, result.pointsChange, result.streakBonus, result.newWinStreak)
                             }
                         }) { Text("Confirmer") }
@@ -183,6 +203,49 @@ fun VerdictScreen(
                 if (hasTimer) {
                     TimerBar(remainingSeconds = remainingSeconds)
                     Spacer(Modifier.height(16.dp))
+                }
+
+                // Clue recap toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { showClueRecap = !showClueRecap }) {
+                        Text(
+                            if (showClueRecap) "🗂️ Masquer les indices" else "🗂️ Voir mes indices",
+                            color = GoldPrimary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+                if (showClueRecap) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = DarkCard
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            val hasAnyClues = case.suspects.any { caseRepository.getDiscoveredClueCount(it.id) > 0 }
+                            if (!hasAnyClues) {
+                                Text("Aucun indice trouvé lors des interrogatoires.", color = TextDimmed, style = MaterialTheme.typography.bodySmall)
+                            } else {
+                                case.suspects.forEach { suspect ->
+                                    val clues = caseRepository.getDiscoveredClues(suspect.id)
+                                    if (clues.isNotEmpty()) {
+                                        Text(suspect.nom, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = GoldPrimary)
+                                        Spacer(Modifier.height(2.dp))
+                                        Text(
+                                            clues.joinToString(" · ") { it.label },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = TextGray
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
                 }
 
                 Text(

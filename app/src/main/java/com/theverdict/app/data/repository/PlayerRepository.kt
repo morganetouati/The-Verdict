@@ -21,7 +21,8 @@ class PlayerRepository(private val prefs: PreferencesManager) {
         currentProfile: PlayerProfile,
         case: Case,
         selectedLiarIds: List<Int>,
-        isReplay: Boolean = false
+        isReplay: Boolean = false,
+        isDailyCase: Boolean = false
     ): VerdictResult {
         val isCorrect = checkAnswer(case, selectedLiarIds)
         val basePoints = if (isReplay) 0 else calculatePoints(case.difficulte, isCorrect)
@@ -58,12 +59,21 @@ class PlayerRepository(private val prefs: PreferencesManager) {
             val newThemeProgress = currentProfile.themeProgress.toMutableMap()
             val themeIndex = case.theme.ordinal
             val currentCount = newThemeProgress[themeIndex] ?: 0
-            newThemeProgress[themeIndex] = currentCount + 1
+            newThemeProgress[themeIndex] = (currentCount + 1).coerceAtMost(10)
 
             val xpGained = (basePoints + streakBonus).coerceAtLeast(0).toLong()
 
+            // Daily case bonus: +5 reputation if correct and not already done today
+            val todayEpochDay = LocalDate.now().toEpochDay()
+            val dailyBonus = if (isDailyCase && isCorrect &&
+                currentProfile.lastDailyCaseEpochDay != todayEpochDay) 10 else 0
+            val finalReputation = (newReputation + dailyBonus).coerceIn(0, 100)
+            val newLastDailyCaseEpochDay = if (isDailyCase && isCorrect &&
+                currentProfile.lastDailyCaseEpochDay != todayEpochDay) todayEpochDay
+            else currentProfile.lastDailyCaseEpochDay
+
             val updatedProfile = currentProfile.copy(
-                reputation = newReputation,
+                reputation = finalReputation,
                 casesPlayed = currentProfile.casesPlayed + 1,
                 correctVerdicts = currentProfile.correctVerdicts + if (isCorrect) 1 else 0,
                 wrongVerdicts = currentProfile.wrongVerdicts + if (!isCorrect) 1 else 0,
@@ -73,7 +83,8 @@ class PlayerRepository(private val prefs: PreferencesManager) {
                 bestWinStreak = maxOf(currentProfile.bestWinStreak, newWinStreak),
                 streakDays = newStreakDays,
                 lastPlayedEpochDay = newLastPlayed,
-                totalXP = currentProfile.totalXP + xpGained
+                totalXP = currentProfile.totalXP + xpGained,
+                lastDailyCaseEpochDay = newLastDailyCaseEpochDay
             )
             prefs.updateProfile(updatedProfile)
         }
@@ -101,21 +112,21 @@ class PlayerRepository(private val prefs: PreferencesManager) {
     private fun calculatePoints(difficulty: Int, isCorrect: Boolean): Int {
         return if (isCorrect) {
             when (difficulty) {
-                1 -> 2
-                2 -> 4
-                3 -> 6
-                4 -> 8
-                5 -> 10
-                else -> 4
+                1 -> 3
+                2 -> 5
+                3 -> 7
+                4 -> 9
+                5 -> 11
+                else -> 5
             }
         } else {
             when (difficulty) {
-                1 -> -4
-                2 -> -6
-                3 -> -8
-                4 -> -10
+                1 -> -2
+                2 -> -4
+                3 -> -6
+                4 -> -8
                 5 -> -10
-                else -> -6
+                else -> -4
             }
         }
     }

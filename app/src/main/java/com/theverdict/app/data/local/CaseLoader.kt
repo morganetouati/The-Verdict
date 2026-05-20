@@ -23,7 +23,7 @@ class CaseLoader(private val context: Context) {
     fun loadCasesForTheme(theme: CaseTheme): List<Case> {
         val fileName = themeFiles[theme] ?: return emptyList()
         val jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
-        return json.decodeFromString<List<Case>>(jsonString)
+        return json.decodeFromString<List<Case>>(jsonString).take(10)
     }
 
     fun loadAllCases(): Map<CaseTheme, List<Case>> {

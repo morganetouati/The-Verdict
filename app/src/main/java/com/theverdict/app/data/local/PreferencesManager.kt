@@ -36,6 +36,7 @@ class PreferencesManager(private val context: Context) {
         val STREAK_DAYS = intPreferencesKey("streak_days")
         val LAST_PLAYED_EPOCH_DAY = longPreferencesKey("last_played_epoch_day")
         val TOTAL_XP = longPreferencesKey("total_xp")
+        val LAST_DAILY_CASE_EPOCH_DAY = longPreferencesKey("last_daily_case_epoch_day")
     }
 
     val playerProfile: Flow<PlayerProfile> = context.dataStore.data.map { prefs ->
@@ -48,13 +49,14 @@ class PreferencesManager(private val context: Context) {
             wrongVerdicts = prefs[Keys.WRONG_VERDICTS] ?: 0,
             currentThemeIndex = prefs[Keys.CURRENT_THEME_INDEX] ?: 0,
             currentCaseIndex = prefs[Keys.CURRENT_CASE_INDEX] ?: 0,
-            themeProgress = deserializeIntMap(prefs[Keys.THEME_PROGRESS]),
+            themeProgress = deserializeIntMap(prefs[Keys.THEME_PROGRESS]).mapValues { it.value.coerceAtMost(10) },
             completedCaseIds = deserializeIntSet(prefs[Keys.COMPLETED_CASE_IDS]),
             winStreak = prefs[Keys.WIN_STREAK] ?: 0,
             bestWinStreak = prefs[Keys.BEST_WIN_STREAK] ?: 0,
             streakDays = prefs[Keys.STREAK_DAYS] ?: 0,
             lastPlayedEpochDay = prefs[Keys.LAST_PLAYED_EPOCH_DAY] ?: -1L,
-            totalXP = prefs[Keys.TOTAL_XP] ?: 0L
+            totalXP = prefs[Keys.TOTAL_XP] ?: 0L,
+            lastDailyCaseEpochDay = prefs[Keys.LAST_DAILY_CASE_EPOCH_DAY] ?: -1L
         )
     }
 
@@ -75,6 +77,7 @@ class PreferencesManager(private val context: Context) {
             prefs[Keys.STREAK_DAYS] = profile.streakDays
             prefs[Keys.LAST_PLAYED_EPOCH_DAY] = profile.lastPlayedEpochDay
             prefs[Keys.TOTAL_XP] = profile.totalXP
+            prefs[Keys.LAST_DAILY_CASE_EPOCH_DAY] = profile.lastDailyCaseEpochDay
         }
     }
 

@@ -39,7 +39,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import com.theverdict.app.data.repository.CaseRepository
 import com.theverdict.app.domain.model.CaseTheme
 import com.theverdict.app.domain.model.Suspect
+import com.theverdict.app.ui.components.PressureBar
 import com.theverdict.app.ui.components.SuspectAvatar
 import com.theverdict.app.ui.components.ErrorState
 import com.theverdict.app.ui.theme.*
@@ -78,7 +80,10 @@ fun SuspectsListScreen(
     val theme = CaseTheme.entries[themeIndex]
     val case = caseRepository.getCase(theme, caseIndex)
     val haptic = LocalHapticManager.current
-    val interrogatedIds = remember { mutableStateListOf<Int>() }
+
+    // Reactive state from repository — auto-updates when any screen marks a suspect
+    val interrogatedIds by caseRepository.interrogatedSuspectIds.collectAsState()
+    val pressure by caseRepository.pressureLevel.collectAsState()
 
     Column(
         modifier = Modifier
@@ -109,6 +114,14 @@ fun SuspectsListScreen(
         )
 
         if (case != null) {
+            // Pressure bar
+            PressureBar(
+                pressure = pressure,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
+            )
+
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -126,9 +139,9 @@ fun SuspectsListScreen(
                     SuspectCard(
                         suspect = suspect,
                         isInterrogated = suspect.id in interrogatedIds,
+                        clueCount = caseRepository.getDiscoveredClueCount(suspect.id),
                         onClick = {
                             haptic.lightTap()
-                            if (suspect.id !in interrogatedIds) interrogatedIds.add(suspect.id)
                             onInterrogate(suspect.id)
                         },
                         modifier = Modifier.graphicsLayer {
@@ -139,14 +152,15 @@ fun SuspectsListScreen(
                 }
             }
 
-            // Gold gradient verdict button
+            // Verdict button — enabled only when ALL suspects have been interrogated
+            val canVote = case.suspects.all { it.id in interrogatedIds }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
                     .padding(24.dp)
                     .drawBehind {
-                        drawRoundRect(
+                        if (canVote) drawRoundRect(
                             brush = Brush.verticalGradient(listOf(Color(0x40D4A24C), Color.Transparent)),
                             cornerRadius = CornerRadius(24.dp.toPx()),
                             topLeft = Offset(0f, 4.dp.toPx()),
@@ -159,17 +173,25 @@ fun SuspectsListScreen(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight)))
-                        .clickable { onGoToVerdict() },
+                        .background(
+                            if (canVote) Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight))
+                            else Brush.horizontalGradient(listOf(DarkSurfaceVariant, DarkSurfaceVariant))
+                        )
+                        .clickable(enabled = canVote) { onGoToVerdict() },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Gavel, contentDescription = null, tint = DarkBackground, modifier = Modifier.size(22.dp))
+                        Icon(
+                            Icons.Default.Gavel,
+                            contentDescription = null,
+                            tint = if (canVote) DarkBackground else TextDimmed,
+                            modifier = Modifier.size(22.dp)
+                        )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "RENDRE LE VERDICT",
+                            if (canVote) "RENDRE LE VERDICT" else "Interrogez tous les suspects",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp),
-                            color = DarkBackground
+                            color = if (canVote) DarkBackground else TextDimmed
                         )
                     }
                 }
@@ -184,9 +206,10 @@ fun SuspectsListScreen(
 private fun SuspectCard(
     suspect: Suspect,
     isInterrogated: Boolean,
+    clueCount: Int = 0,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
-) {
+){
     val dim = LocalDimensions.current
     val cardAvatarSize = dim.avatarSizeSmall * 1.4f
     Surface(
@@ -203,7 +226,10 @@ private fun SuspectCard(
             }
             .border(
                 width = 1.dp,
-                brush = Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.3f), GoldPrimary.copy(alpha = 0.15f))),
+                brush = if (isInterrogated)
+                    Brush.horizontalGradient(listOf(VerdictCorrect.copy(alpha = 0.5f), VerdictCorrect.copy(alpha = 0.25f)))
+                else
+                    Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.3f), GoldPrimary.copy(alpha = 0.15f))),
                 shape = RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onClick),
@@ -250,7 +276,10 @@ private fun SuspectCard(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = if (isInterrogated) "Déjà interrogé" else "Appuyer pour interroger",
+                    text = if (isInterrogated) {
+                        val label = if (clueCount > 1) "indices trouvés" else "indice trouvé"
+                        "🔎 $clueCount $label"
+                    } else "Appuyer pour interroger",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isInterrogated) VerdictCorrect.copy(alpha = 0.7f) else GoldLight.copy(alpha = 0.6f)
                 )
