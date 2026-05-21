@@ -192,6 +192,7 @@ fun InterrogationScreen(
                     size = dim.avatarSize,
                     initialDiscoveredClues = initialDiscoveredClues,
                     hintClue = hintClue,
+                    pressureLevel = pressure,
                     onClueDiscovered = { clue ->
                         caseRepository.addDiscoveredClue(suspectId, clue)
                         lastClueCount = caseRepository.getDiscoveredClueCount(suspectId)

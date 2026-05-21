@@ -13,6 +13,9 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -92,6 +95,7 @@ fun InteractiveAvatar(
     size: Dp = 300.dp,
     initialDiscoveredClues: List<Clue> = emptyList(),
     hintClue: Clue? = null,
+    pressureLevel: Int = 0,
     onClueDiscovered: (Clue) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -114,6 +118,15 @@ fun InteractiveAvatar(
     var flashingZone by remember { mutableStateOf<AvatarZone?>(null) }
     val haptic = LocalHapticManager.current
     val scope = rememberCoroutineScope()
+
+    // Tap flash: gold glow on the zone immediately when tapped
+    var tapFlashZone by remember { mutableStateOf<AvatarZone?>(null) }
+    val tapFlashAlpha = remember { Animatable(0f) }
+
+    // Popup: shows discovered clue label briefly above the touched zone
+    var popupZone by remember { mutableStateOf<AvatarZone?>(null) }
+    var popupText by remember { mutableStateOf("") }
+    var popupVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(flashingZone) {
         if (flashingZone != null) {
@@ -173,7 +186,8 @@ fun InteractiveAvatar(
             SuspectAvatar(
                 config = config,
                 clues = discoveredClues.keys.toList(),
-                size = size
+                size = size,
+                pressureLevel = pressureLevel
             )
 
             // Clickable zone overlays — invisible by default, glow on result
@@ -222,6 +236,13 @@ fun InteractiveAvatar(
                             }
                             .clip(RoundedCornerShape(8.dp))
                             .drawBehind {
+                                // Tap flash: instant gold burst when tapped
+                                if (tapFlashZone == zone && tapFlashAlpha.value > 0f) {
+                                    drawRoundRect(
+                                        color = GoldPrimary.copy(alpha = tapFlashAlpha.value),
+                                        cornerRadius = CornerRadius(8.dp.toPx())
+                                    )
+                                }
                                 // Pulsing gold border on unexplored zones so player sees them
                                 if (result == null) {
                                     drawRoundRect(
@@ -246,6 +267,13 @@ fun InteractiveAvatar(
                                 }
                             }
                             .clickable(enabled = result == null) {
+                                // Immediate gold flash regardless of outcome
+                                scope.launch {
+                                    tapFlashZone = zone
+                                    tapFlashAlpha.snapTo(0.65f)
+                                    tapFlashAlpha.animateTo(0f, tween(450))
+                                    tapFlashZone = null
+                                }
                                 val matchingClues = zone.relatedClues.filter { it in suspectClues }
                                 if (matchingClues.isNotEmpty()) {
                                     haptic.successPulse()
@@ -253,6 +281,16 @@ fun InteractiveAvatar(
                                     matchingClues.forEach { clue ->
                                         discoveredClues[clue] = true
                                         onClueDiscovered(clue)
+                                    }
+                                    // Show popup with first discovered clue label
+                                    popupZone = zone
+                                    popupText = matchingClues.first().label
+                                    popupVisible = true
+                                    scope.launch {
+                                        delay(1800)
+                                        popupVisible = false
+                                        delay(400)
+                                        popupZone = null
                                     }
                                 } else {
                                     haptic.errorBuzz()
@@ -284,6 +322,32 @@ fun InteractiveAvatar(
                     }
                 }
         }
+
+            // Animated popup showing discovered clue label above the touched zone
+            if (popupZone != null) {
+                val pZone = popupZone!!
+                val popupX = ((pZone.left + pZone.right) / 2f * size.value - 72f).dp
+                val popupY = (pZone.top * size.value - 44f).coerceAtLeast(0f).dp
+                Column(modifier = Modifier.offset(x = popupX, y = popupY)) {
+                    AnimatedVisibility(
+                        visible = popupVisible,
+                        enter = scaleIn(tween(180), initialScale = 0.6f) + fadeIn(tween(180)),
+                        exit = fadeOut(tween(300))
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = GoldDark.copy(alpha = 0.95f)
+                        ) {
+                            Text(
+                                text = "✨ $popupText",
+                                color = DarkBackground,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
 
         // Discovered clues section
         val found = discoveredClues.keys.toList()

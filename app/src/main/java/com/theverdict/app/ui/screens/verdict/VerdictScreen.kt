@@ -76,6 +76,7 @@ import com.theverdict.app.domain.model.Suspect
 import com.theverdict.app.ui.components.SuspectAvatar
 import com.theverdict.app.ui.components.TimerBar
 import com.theverdict.app.ui.components.ErrorState
+import com.theverdict.app.ui.components.VerdictCinematic
 import com.theverdict.app.ui.theme.*
 import com.theverdict.app.ui.util.LocalHapticManager
 import kotlinx.coroutines.delay
@@ -103,6 +104,12 @@ fun VerdictScreen(
     var showTimeUpDialog by remember { mutableStateOf(false) }
     var showClueRecap by remember { mutableStateOf(false) }
 
+    // Cinematic verdict payload — non-null while animation is playing
+    var cinematicIsCorrect by remember { mutableStateOf<Boolean?>(null) }
+    var cinematicPointsChange by remember { mutableIntStateOf(0) }
+    var cinematicStreakBonus by remember { mutableIntStateOf(0) }
+    var cinematicWinStreak by remember { mutableIntStateOf(0) }
+
     // Timer
     var remainingSeconds by remember { mutableIntStateOf(90) }
     val hasTimer = theme.hasTimer
@@ -121,6 +128,7 @@ fun VerdictScreen(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -180,10 +188,14 @@ fun VerdictScreen(
                             haptic.heavyImpact()
                             isSubmitting = true
                             scope.launch {
-                                delay(500)
+                                delay(300)
                                 val liarIds = if (nobodySelected == 1) emptyList() else selectedIds.toList()
                                 val result = playerRepository.applyVerdict(profile, case, liarIds, isDailyCase = isDaily)
-                                onResult(result.isCorrect, result.pointsChange, result.streakBonus, result.newWinStreak)
+                                // Store payload then show cinematic
+                                cinematicPointsChange = result.pointsChange
+                                cinematicStreakBonus = result.streakBonus
+                                cinematicWinStreak = result.newWinStreak
+                                cinematicIsCorrect = result.isCorrect
                             }
                         }) { Text("Confirmer") }
                     },
@@ -409,7 +421,19 @@ fun VerdictScreen(
         } else {
             ErrorState(message = "Affaire introuvable", onBack = null)
         }
+    } // end Column
+
+    // Cinematic verdict overlay — shown after confirm (overlays entire screen)
+    val cinCorrect = cinematicIsCorrect
+    if (cinCorrect != null) {
+        VerdictCinematic(
+            isCorrect = cinCorrect,
+            onFinished = {
+                onResult(cinCorrect, cinematicPointsChange, cinematicStreakBonus, cinematicWinStreak)
+            }
+        )
     }
+    } // end Box
 }
 
 // Unused overlay alpha – kept for future dramatic transition if needed
@@ -421,6 +445,18 @@ private fun SuspectVerdictCard(
     onClick: () -> Unit
 ) {
     val bounceScale = remember { Animatable(1f) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessHigh, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "pressScale"
+    )
+    val borderAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 1f else if (isPressed) 0.6f else 0.2f,
+        animationSpec = tween(200),
+        label = "borderAlpha"
+    )
     val bgColor by animateColorAsState(
         targetValue = if (isSelected) VerdictWrong.copy(alpha = 0.1f) else DarkCard,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -437,13 +473,18 @@ private fun SuspectVerdictCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer { scaleX = bounceScale.value; scaleY = bounceScale.value }
-            .clickable(onClick = onClick)
+            .graphicsLayer {
+                val combined = bounceScale.value * pressScale
+                scaleX = combined; scaleY = combined
+            }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .then(
-                if (isSelected) Modifier.border(2.dp, VerdictWrong, RoundedCornerShape(16.dp))
+                if (isSelected) Modifier.border(2.dp, VerdictWrong.copy(alpha = borderAlpha), RoundedCornerShape(16.dp))
                 else Modifier.border(
                     1.dp,
-                    Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.2f), GoldPrimary.copy(alpha = 0.1f))),
+                    Brush.horizontalGradient(
+                        listOf(GoldDark.copy(alpha = borderAlpha), GoldPrimary.copy(alpha = borderAlpha * 0.7f))
+                    ),
                     RoundedCornerShape(16.dp)
                 )
             ),

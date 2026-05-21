@@ -1,5 +1,6 @@
 package com.theverdict.app.ui.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -7,22 +8,28 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.theverdict.app.domain.model.AvatarConfig
 import com.theverdict.app.domain.model.Clue
+import kotlinx.coroutines.delay
 
 private val skinTones = listOf(
     Color(0xFFFDDEB4), Color(0xFFF1C27D), Color(0xFFE0AC69),
@@ -54,6 +61,7 @@ fun SuspectAvatar(
     config: AvatarConfig,
     clues: List<Clue> = emptyList(),
     size: Dp = 100.dp,
+    pressureLevel: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val isFemale = config.gender == 1
@@ -104,7 +112,49 @@ fun SuspectAvatar(
         label = "breath"
     )
 
-    Canvas(modifier = modifier.size(size)) {
+    // === IDLE ANIMATIONS ===
+    // Floating: gentle sinusoidal vertical drift
+    val floatAnim by inf.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(3200, easing = LinearEasing), RepeatMode.Reverse),
+        label = "float"
+    )
+    // Pressure shake: fast horizontal oscillation when pressure is high
+    val pressureShake by inf.animateFloat(
+        initialValue = -1f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(130, easing = LinearEasing), RepeatMode.Reverse),
+        label = "pressShake"
+    )
+    // Blink: random coroutine-driven eye close
+    val blinkScale = remember { Animatable(1f) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay((2500L..5000L).random())
+            blinkScale.animateTo(0f, tween(80))
+            blinkScale.animateTo(1f, tween(80))
+        }
+    }
+
+    val blinkScaleVal = blinkScale.value
+    val floatOffset = (floatAnim - 0.5f) * 12f
+    val shakeOffset = if (pressureLevel >= 80) pressureShake * 5f else 0f
+
+    Box(modifier = modifier.size(size)) {
+        // Red pressure glow halo when stress is critical
+        if (pressureLevel >= 80) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFFFF1744).copy(alpha = 0.30f), Color.Transparent),
+                        radius = this.size.width * 0.56f
+                    )
+                )
+            }
+        }
+        Canvas(modifier = Modifier.size(size).graphicsLayer {
+            translationY = floatOffset
+            translationX = shakeOffset
+        }) {
         val w = this.size.width
         val h = this.size.height
         val cx = w / 2f
@@ -285,7 +335,7 @@ fun SuspectAvatar(
         val eyeY = headCenterY - headRadius * 0.04f
         val eyeSpacing = headRadius * 0.37f
         val eyeW = headRadius * 0.3f
-        val eyeH = if (isFemale) headRadius * 0.27f else headRadius * 0.24f
+        val eyeH = (if (isFemale) headRadius * 0.27f else headRadius * 0.24f) * blinkScaleVal.coerceAtLeast(0.02f)
         val eyeOffsetX = if (hasShiftyEyes) eyeShift * headRadius * 0.1f else 0f
         val leftEyeCx = cx - eyeSpacing + trembleOffset
         val rightEyeCx = cx + eyeSpacing + trembleOffset
@@ -403,7 +453,8 @@ fun SuspectAvatar(
 
         // === ACCESSORIES ===
         drawAccessory(config.accessory, isFemale, cx + trembleOffset, headCenterY, headRadius)
-    }
+        }  // end Canvas
+    }  // end Box
 }
 
 // Draw face as a realistic oval path with jaw/chin shape

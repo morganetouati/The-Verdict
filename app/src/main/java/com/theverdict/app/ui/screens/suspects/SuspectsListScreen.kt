@@ -1,7 +1,9 @@
 package com.theverdict.app.ui.screens.suspects
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -212,79 +214,111 @@ private fun SuspectCard(
 ){
     val dim = LocalDimensions.current
     val cardAvatarSize = dim.avatarSizeSmall * 1.4f
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.965f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessHigh),
+        label = "cardScale"
+    )
+    val borderAlpha by animateFloatAsState(
+        targetValue = if (isPressed) 0.55f else (if (isInterrogated) 0.5f else 0.3f),
+        animationSpec = tween(120),
+        label = "borderAlpha"
+    )
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .drawBehind {
-                // Shadow under card
+                // Depth shadow
                 drawRoundRect(
-                    color = Color.Black.copy(alpha = 0.35f),
+                    color = Color.Black.copy(alpha = 0.38f),
                     cornerRadius = CornerRadius(16.dp.toPx()),
-                    topLeft = Offset(2.dp.toPx(), 4.dp.toPx()),
+                    topLeft = Offset(2.dp.toPx(), 5.dp.toPx()),
                     size = Size(size.width - 2.dp.toPx(), size.height)
                 )
             }
             .border(
-                width = 1.dp,
+                width = if (isPressed) 1.5.dp else 1.dp,
                 brush = if (isInterrogated)
-                    Brush.horizontalGradient(listOf(VerdictCorrect.copy(alpha = 0.5f), VerdictCorrect.copy(alpha = 0.25f)))
+                    Brush.horizontalGradient(listOf(VerdictCorrect.copy(alpha = borderAlpha), VerdictCorrect.copy(alpha = borderAlpha * 0.5f)))
                 else
-                    Brush.horizontalGradient(listOf(GoldDark.copy(alpha = 0.3f), GoldPrimary.copy(alpha = 0.15f))),
+                    Brush.horizontalGradient(listOf(GoldDark.copy(alpha = borderAlpha), GoldPrimary.copy(alpha = borderAlpha * 0.5f))),
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable(onClick = onClick),
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         color = DarkCard
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar with optional interrogated badge
-            Box {
-                SuspectAvatar(
-                    config = suspect.avatar,
-                    clues = suspect.indices,
-                    size = cardAvatarSize
-                )
-                if (isInterrogated) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(22.dp)
-                            .clip(CircleShape)
-                            .background(VerdictCorrect),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = "Interrogé",
-                            tint = Color.White,
-                            modifier = Modifier.size(14.dp)
+        Box {
+            // Subtle gold sheen at top (glassmorphism depth hint)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.5.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color.Transparent,
+                                GoldPrimary.copy(alpha = if (isPressed) 0.35f else 0.18f),
+                                Color.Transparent
+                            )
                         )
+                    )
+            )
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Avatar with optional interrogated badge
+                Box {
+                    SuspectAvatar(
+                        config = suspect.avatar,
+                        clues = suspect.indices,
+                        size = cardAvatarSize
+                    )
+                    if (isInterrogated) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(22.dp)
+                                .clip(CircleShape)
+                                .background(VerdictCorrect),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = "Interrogé",
+                                tint = Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
                     }
                 }
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = suspect.nom,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = TextWhite,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = if (isInterrogated) {
+                            val label = if (clueCount > 1) "indices trouvés" else "indice trouvé"
+                            "🔎 $clueCount $label"
+                        } else "Appuyer pour interroger",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isInterrogated) VerdictCorrect.copy(alpha = 0.7f) else GoldLight.copy(alpha = 0.6f)
+                    )
+                }
+                Icon(Icons.Default.ChevronRight, contentDescription = "Voir le détail de ${suspect.nom}", tint = GoldPrimary.copy(alpha = 0.5f))
             }
-            Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = suspect.nom,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = TextWhite,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = if (isInterrogated) {
-                        val label = if (clueCount > 1) "indices trouvés" else "indice trouvé"
-                        "🔎 $clueCount $label"
-                    } else "Appuyer pour interroger",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isInterrogated) VerdictCorrect.copy(alpha = 0.7f) else GoldLight.copy(alpha = 0.6f)
-                )
-            }
-            Icon(Icons.Default.ChevronRight, contentDescription = "Voir le détail de ${suspect.nom}", tint = GoldPrimary.copy(alpha = 0.5f))
         }
     }
 }
